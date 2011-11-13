@@ -1,74 +1,5 @@
-# coding=UTF8
-
-import numpy as np
-
-strmap=[
-    #012345678901234567890123456789
-    u"██████████████████████████████",
-    u"███                     ██   █",
-    u"██  ███████ █████ █████    █ █",
-    u"██        █ █   █      █ █   █",
-    u"█  ███  █ █ █ █   ████ █ ██ ██",
-    u"█  ██     █ █          █ ██ ██",
-    u"██ ███  ███ ████ ███  ██ ██ ██",
-    u"██     █       █     █       █",
-    u"█      █ ██ ██  ████ █ ██ ████",
-    u"█ ████ █  █   █    █ █ ██ █ ██",
-    u"█    █    ███ ████   █ ██    █",
-    u"█ ██ ████  ██ ████████ █  S ██",
-    u"█ █      █ ██        █ █     █",
-    u"███ █ ██ ████     ██ █ ██ 4███",
-    u"█   █ ██   ██     ██   █G ████",
-    u"███ █   ██ ██     ████ ██ ████",
-    u"█ █ ███  █        ████ █     █",
-    u"█ █    █ ████████ █  █ █  ████",
-    u"█   ██ █   ██████ █     █    █",
-    u"█      █ █   ██   █ ███  ██ ██",
-    u"███ ██ █  ██ ██ ███    █ ██  █",
-    u"███ ██ █  ██       █  ██  █ ██",
-    u"█    █ █  █████████████ █ █  █",
-    u"███ ██ █     ██    ███  █ █ ██",
-    u"██  █  █  ██    ██      █ █ ██",
-    u"██ ███ █  ██████       ██ █ ██",
-    u"█   █  █          █  █  █ █ ██",
-    u"█ █   ███████████       █ █  █",
-    u"█   ██████████████████  █ ████",
-    u"█████████████████████████ ████"
-  ]
-
-strmap=[
-    #012345678901234567890123456789
-    u"██████████████████████████████",
-    u"███                     ██   █",
-    u"██  ███████ █████ █████    █ █",
-    u"██        █ █   █      █ █   █",
-    u"█  ███  █ █ █ █   ████ █ ██ ██",
-    u"█  ██     █ █          █ ██ ██",
-    u"██ ███  ███ ████ ███  ██ ██ ██",
-    u"██     █       █     █       █",
-    u"█      █ ██ ██  ████ █ ██ ████",
-    u"█ ████ █  █   █    █ █ ██ █ ██",
-    u"█    █    ███ ████   █ ██    █",
-    u"█ ██ ████  ██ ████████ █  S ██",
-    u"█ █      █ ██        █ █     █",
-    u"███ █ ██ ████     ██ █ █4 4███",
-    u"█   █ ██   ██     ██   █G 1███",
-    u"███ █   ██ ██     ████ █2 213█",
-    u"█ █ ███  █        ████ 2     2",
-    u"█ █    █ ████████ █  █ 1  124█",
-    u"█   ██ █   ██████ █     4    2",
-    u"█      █ █   ██   █ ███  32 3█",
-    u"███ ██ █  ██ ██ ███    █ █T  3",
-    u"███ ██ █  ██       █  ██  3 4█",
-    u"█    █ █  █████████████ █ 1  1",
-    u"███ ██ █     ██    ███  █ 2 1█",
-    u"██  █  █  ██    ██      █ 1 P█",
-    u"██ ███ █  ██████       ██ 4 3█",
-    u"█   █  █          █  █  █ 3 1█",
-    u"█ █   ███████████       █ 1  3",
-    u"█   ██████████████████  █ █43█",
-    u"█████████████████████████ ████"
-  ]
+from bt.extract.item_data import load_streets
+bt_dir = '../content/msdos/Bard1'
 
 class Street:
     def __init__(self, name=""):
@@ -81,21 +12,11 @@ class Building:
         self.type = type
         self.front = front
 
-repl = {u" ": Street("Unknown"), 
-        u"█": Building('house1'), 
-        u"1": Building('house1'), 
-        u"2": Building('house2'), 
-        u"3": Building('house3'), 
-        u"4": Building('house4'), 
-        u"G": Building('house3', 'guild.png'), 
-        u"S": Building('house4', 'shop.png'), 
-        u"T": Building('house1', 'temple.png'), 
-        u"P": Building('house2', 'pub.png')
-        }
 
 class CityMap:
     def __init__(self, strmap, repl):
-        self.map = [[repl[c] for c in line] for line in reversed(strmap)]
+        self.map = [[repl.get(c, Street("???")) for c in line] for line in reversed(strmap)]
+
     def __getitem__(self, pt):
         try:
             return self.map[pt[1]][pt[0]]
@@ -103,38 +24,50 @@ class CityMap:
             return None
 
 
-_left = lambda dir: (dir + 1) % 4
-_reverse = lambda dir: (dir + 2) % 4
-_right = lambda dir: (dir + 3) % 4
-class Direction():
-    NORTH = 0
-    WEST = 1
-    SOUTH = 2
-    EAST = 3
-    vectors = np.array([[0, 1], [-1, 0], [0, -1], [1, 0]])
+def make_city_map():
+    from bt.extract.huffman import read_city_name, read_city_path
+    binmap = read_city_path()
+    strmap = [binmap[i * 30:(i + 1) * 30] for i in xrange(30)]
+    ustreet = Street("Unknown")
+    repl = {0x00: ustreet,
+            0x01: Building('house1'),
+            0x02: Building('house2'),
+            0x03: Building('house3'),
+            0x04: Building('house4'),
+            0x0B: Building('house3', 'guild.png'), # Adventurer's Guild
+            0x12: Building('house2', 'pub.png'), # Pub/Inn
+            0x1C: Building('house4', 'shop.png'), # Garth's Shop
+            0x21: Building('house1', 'temple.png'), # Temple
+            0x2B: "R", # Review Board
+            0x60: Street("Statue here"), # Statue
+            0x68: Street("Iron Gate"), # Gate to Tower
+            0x71: Building('house1', 'temple.png'), # Catacombs/Mad God Temple
+            0x78: Street("Sewer entrance"), # Stairs from Sewers
+            0x81: Building('house2'), # Interplay Credits
+            0x89: Building('house2'), # Roscoe's Energy Emporium
+            0x91: Building('house1'), # Kylearan's Tower
+            0x9B: Building('house1'), # Harkyn's Castle
+            0xA1: Building('house1'), # Mangar's Tower
+            0xA8: Street("City Gates"), # City Gates
+            }
 
-    def __init__(self, dir=NORTH):
-        self.dir = dir
+    nammap = read_city_name()
+    streets = load_streets(bt_dir)
+    cmap = CityMap(strmap, repl)
+    for i in xrange(30):
+        for j in xrange(30):
+            if cmap[(i, j)] is ustreet:
+                ind = nammap[i + (29 - j) * 30]
+                if ind == 0xFF:
+                    name = "Grand Plaz"
+                elif ind < len(streets):
+                    name = streets[ind]
+                else:
+                    name = "Unknown"
 
-    def left(self):
-        self.dir = _left(self.dir)
+                cmap.map[j][i] = Street(name)
+    return cmap
 
-    def reverse(self):
-        self.dir = _reverse(self.dir)
-
-    def right(self):
-        self.dir = _right(self.dir)
-    
-    @property
-    def forward_vec(self):
-        return Direction.vectors[self.dir,:]
-    @property
-    def left_vec(self):
-        return Direction.vectors[_left(self.dir),:]
-    @property
-    def right_vec(self):
-        return Direction.vectors[_right(self.dir),:]
-        
 #
 #   F2
 # L2F1R2
