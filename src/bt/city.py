@@ -1,13 +1,17 @@
 from bt.extract.item_data import load_streets
 bt_dir = '../content/msdos/Bard1'
 
-class Street:
+class Cell(object):
+    def is_building(self):
+        return isinstance(self, Building)
+
+class Street(Cell):
     def __init__(self, name=""):
         self.name = name
     def __str__(self):
         return self.name
 
-class Building:
+class Building(Cell):
     def __init__(self, type, front=None):
         self.type = type
         self.front = front
@@ -25,8 +29,8 @@ class CityMap:
 
 
 def make_city_map():
-    from bt.extract.huffman import read_city_name, read_city_path
-    binmap = read_city_path()
+    from bt.extract.ext_levels import read_city_name, read_city_path
+    binmap = read_city_path(bt_dir)
     strmap = [binmap[i * 30:(i + 1) * 30] for i in xrange(30)]
     ustreet = Street("Unknown")
     repl = {0x00: ustreet,
@@ -51,7 +55,7 @@ def make_city_map():
             0xA8: Street("City Gates"), # City Gates
             }
 
-    nammap = read_city_name()
+    nammap = read_city_name(bt_dir)
     streets = load_streets(bt_dir)
     cmap = CityMap(strmap, repl)
     for i in xrange(30):

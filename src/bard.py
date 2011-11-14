@@ -1,4 +1,4 @@
-dir = '../res'
+dir = '../res/image'
 bt_dir = '../content/msdos/Bard1'
 
 from pygame import Surface
@@ -22,7 +22,7 @@ def isbuildingat(state, forw, left=0):
     cell = state.map[state.pos +
                      forw * state.dir.forward_vec +
                      left * state.dir.left_vec]
-    if isinstance(cell, Building):
+    if cell.is_building():
         return cell
     return None
 
@@ -73,7 +73,7 @@ def redraw(state):
     pygame.display.flip()
 
 def forward(state):
-    if not isinstance(state.map[state.pos + state.dir.forward_vec], Building):
+    if not state.map[state.pos + state.dir.forward_vec].is_building():
         state.pos = state.pos + state.dir.forward_vec
         redraw(state)
     else:
