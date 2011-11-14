@@ -29,19 +29,40 @@ Levels
 
 In BT1:
 
-* stored in 'levs' file, as indexed/compressed file
+* Stored in 'levs' file, as indexed/compressed file, contains 15
+  chunks of data, with:
 
-* First 22*22 byte: wall data. Each byte:
+  *  0 = Wine Cellar
+  *  1 = Sewers 1
+  *  2 = Sewers 2
+  *  3 = Sewers 3
+  *  4 = Catacombs 1
+  *  5 = Catacombs 2
+  *  6 = Catacombs 3
+  *  7 = Harkyn's Castle 1
+  *  8 = Harkyn's Castle 2
+  *  9 = Harkyn's Castle 3
+  * 10 = Kylearan's Tower
+  * 11 = Mangar's Tower 1
+  * 12 = Mangar's Tower 2
+  * 13 = Mangar's Tower 3
+  * 14 = Mangar's Tower 4
+  * 15 = Mangar's Tower 5
+
+* First 22*22 byte: wall data.  Ordering of bytes: west to east
+  (fast), south to north (slow), zeroth byte (0N, 0E), first byte (0N,
+  1E), 22nd byte (1N, 0E),
+
+* Each byte contains 4 pairs of bits in the ordering: W, E, S,
+  N. Meaning:
+
   * 00 -> Nothing
   * 01 -> Wall
   * 10 -> Door
   * 11 -> Secret Door 
-  Ordering of two bit pairs: W, E, S, N
-  Ordering of bytes: west to east (fast), south to north (slow), zeroth
-  byte (0N, 0E), first byte (0N, 1E), 22nd byte (1N, 0E), 
-  (Credits Horpner)
 
-* Flags (following 484 bytes)
+* Flags (following 484 bytes):
+
   * bit 0 is set if there are stairs up.
   * bit 1 is set if there are stairs down.
   * bit 2 is set if there is a special (this includes spinners, magic
