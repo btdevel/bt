@@ -15,9 +15,9 @@ def expand_4bit(data):
         raw[2 * i + 1] = b & 0x0F
     return raw
 
-def save_4bit_image(data, size, palette, dest):
+def save_4bit_image(data, size, palette, dest=None):
     raw_pal = expand_4bit(data)
-    save_8bit_image(raw_pal, size, palette, dest)
+    return save_8bit_image(raw_pal, size, palette, dest)
 
 def print_4bit_image(data, size):
     raw_pal = expand_4bit(data)
@@ -28,52 +28,27 @@ def print_4bit_image(data, size):
             ind += 1
         print
 
-def save_8bit_image(data, size, palette, dest):
-    if size == (320, 11250):
-        nd = data
-        for i in xrange(320):
-            for j in xrange(250):
-                oi = (i // 4) + (i % 4) * 80
-                oi = i
-                oj = (j // 4) + (j % 4) * 62
-                oj = j
-                nd[i + j * 320] = data[oi + oj * 320]
-        data = nd
-
+def save_8bit_image(data, size, palette, dest=None):
     raw_rgb = pal2rgb(data, palette)
-
     img = pygame.image.fromstring(str(raw_rgb), size, "RGB")
-    pygame.image.save(img, dest)
+    if dest:
+        pygame.image.save(img, dest)
+    return img
 
-def save_RGB16_image(data, size, dest):
-    data = expand_4bit(data)
-    raw_rgb = bytearray(3 * size[0] * size[1])
-    print size, len(data), len(raw_rgb)
+def save_separated_image(data, size, dest=None):
+    raw = bytearray(size[0] * size[1])
+    bit = lambda b, i: (b >> i) & 1
+    vdist = size[1] * (size[0] // 8)
     for i in xrange(size[0]):
         for j in xrange(size[1]):
-            di = i % 2
-            dj = j % 2
-            order = [0, 0, 1, 1]
-            order = [2, 2, 3, 3]
-            order = [0, 2, 1, 3]
-
-            linelen = 2 * size[0]
-            hpos1 = order[di + 2 * dj] * (size[0] // 2)
-            hpos2 = (i // 2)
-            vdist = linelen * size[1] // 2
-            vpos = linelen * j // 2
-            hpos = hpos1 + hpos2
-            b = data[vdist * 0 + hpos + vpos]
-            g = data[vdist * 1 + hpos + vpos]
-            r = data[vdist * 2 + hpos + vpos]
-            f = data[vdist * 3 + hpos + vpos]
-            def cm(c, f):
-                return (c + f) * 8
-            raw_rgb[(i + size[0] * j) * 3:(i + size[0] * j + 1) * 3] = [cm(r, f), cm(g, f), cm(b, f)]
-
-    img = pygame.image.fromstring(str(raw_rgb), size, "RGB")
-    pygame.image.save(img, dest)
-
+            ind = (i // 8) + j * (size[0] // 8)
+            nb = 7 - i % 8
+            b0 = bit(data[ind + 0 * vdist], nb)
+            b1 = bit(data[ind + 1 * vdist], nb)
+            b2 = bit(data[ind + 2 * vdist], nb)
+            b3 = bit(data[ind + 3 * vdist], nb)
+            raw[i + j * size[0]] = (b3 << 3) + (b2 << 2) + (b1 << 1) + (b0 << 0)
+    return save_8bit_image(raw, (size[0], size[1]), palette_ega16(), dest)
 
 def palette_grey16():
     pal = []
@@ -88,7 +63,7 @@ def palette_grey256():
     return pal
 
 def palette_ega16():
-    ega_pal = palette_ega256()
+    ega_pal = palette_ega64()
     pal = [ega_pal[0],
            ega_pal[1],
            ega_pal[2],
@@ -108,7 +83,7 @@ def palette_ega16():
            ]
     return pal
 
-def palette_ega256():
+def palette_ega64():
     ega_pal = []
     bit = lambda b, i: (b >> i) & 1
     for i in range(64):
@@ -117,24 +92,6 @@ def palette_ega256():
         r = 0x55 * (2 * bit(i, 2) + bit(i, 5))
         ega_pal.append(bytearray([r, g, b]))
     return ega_pal
-
-
-
-def read_palette(name, path):
-    # does not work
-    data = btfile.load_file(name, path)
-    pal = []
-    for i in xrange(256):
-        b, g, r, w = data[4 * i:4 * (i + 1)]
-        r, g, b, w = data[4 * i:4 * (i + 1)]
-
-        def cm(c, f):
-#            return min(c * f, 255)
-            return min((c + f) * 8, 255)
-        print([cm(r, w), cm(g, w), cm(b, w)])
-        pal.append(bytearray([cm(r, w), cm(g, w), cm(b, w)]))
-    return pal
-
 
 
 def view_size():
