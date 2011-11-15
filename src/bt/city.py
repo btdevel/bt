@@ -42,15 +42,15 @@ def make_city_map():
             0x12: Building('house2', 'pub.png'), # Pub/Inn
             0x1C: Building('house4', 'shop.png'), # Garth's Shop
             0x21: Building('house1', 'temple.png'), # Temple
-            0x2B: "R", # Review Board
+            0x2B: Building('house3'), # "R", # Review Board
             0x60: Street("Statue here"), # Statue
             0x68: Street("Iron Gate"), # Gate to Tower
             0x71: Building('house1', 'temple.png'), # Catacombs/Mad God Temple
             0x78: Street("Sewer entrance"), # Stairs from Sewers
-            0x81: Building('house2'), # Interplay Credits
-            0x89: Building('house2'), # Roscoe's Energy Emporium
+            0x81: Building('house1'), # Interplay Credits
+            0x89: Building('house1'), # Roscoe's Energy Emporium
             0x91: Building('house1'), # Kylearan's Tower
-            0x9B: Building('house1'), # Harkyn's Castle
+            0x9B: Building('house1'), # Harkyn's Castle *get front
             0xA1: Building('house1'), # Mangar's Tower
             0xA8: Street("City Gates"), # City Gates
             }

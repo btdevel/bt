@@ -93,7 +93,7 @@ def load_indexed_file(name, path=".", index= -1, endians=(GUESS, GUESS, GUESS)):
             data.append(decode_from_offset(inp, offset, endians=endians[1:3]))
     else:
         offset = read_long(inp, index * 4)
-        data = decode_from_offset(inp, offset, bigendians=endians[1:3])
+        data = decode_from_offset(inp, offset, endians=endians[1:3])
     return data
 
 def show_compressed_file_info(name, path=".", endians=(GUESS, GUESS)):
@@ -122,6 +122,7 @@ def show_indexed_file_info(name, path=".", endians=(GUESS, GUESS, GUESS)):
 
 
 def rle_decode(byte_arr):
+    # doesn't seem to work on msdos (should have noted the reference in here)
     ROWS = 128
     COLS = 160
     screen = []

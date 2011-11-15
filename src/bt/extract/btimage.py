@@ -50,6 +50,20 @@ def save_separated_image(data, size, dest=None):
             raw[i + j * size[0]] = (b3 << 3) + (b2 << 2) + (b1 << 1) + (b0 << 0)
     return save_8bit_image(raw, (size[0], size[1]), palette_ega16(), dest)
 
+def save_4bit_partitioned_image(data, parts, pal, namepattern):
+    for part in range(len(parts)):
+        s = 0
+        for i in range(part):
+            s += (parts[i][0] * parts[i][1])
+        w = parts[part][0]
+        h = parts[part][1]
+        if part == len(parts) - 1:
+            rem = len(data) - s // 2 - (w * h) // 2
+            if rem != 0:
+                print "Remaning bytes:", rem
+        subdata = data[s // 2:(s + w * h) // 2]
+        save_4bit_image(subdata, (w, h), pal, namepattern % part)
+
 def palette_grey16():
     pal = []
     for i in xrange(16):
