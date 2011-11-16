@@ -104,4 +104,9 @@ Tools
 For Amiga
 * UAE
 * unadf
+* uae_readdisk
+* http://www.amigaemulator.org/useful
+* adflib
+* adfopus (win only I guess)
+
 

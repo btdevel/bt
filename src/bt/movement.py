@@ -22,9 +22,13 @@ class Direction():
     SOUTH = 2
     EAST = 3
     vectors = map(Vector, [[0, 1], [-1, 0], [0, -1], [1, 0]])
+    names = ["north", "west", "south", "east"]
 
     def __init__(self, dir=NORTH):
         self.dir = dir
+
+    def __str__(self):
+        return Direction.names[self.dir]
 
     def left(self):
         self.dir = _left(self.dir)
