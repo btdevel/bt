@@ -3,7 +3,7 @@ from bt.buildings import guild
 from bt.ui import UI
 
 res_path = '../res/image'
-bt_path = '../content/msdos/Bard1'
+bt_path = '../res/msdos/bt1'
 
 class State:
     def __init__(self):

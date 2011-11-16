@@ -1,3 +1,5 @@
+import os
+
 def load_string_data(ba, ident, num):
     data = [None] * num
     start = ba.find(ident)
@@ -8,8 +10,7 @@ def load_string_data(ba, ident, num):
     return data
 
 def load_streets(bt_dir):
-    import os
-    filename = os.path.join(bt_dir, "MEMDUMP.BIN")
+    filename = os.path.join(bt_dir, "bard.exe")
     f = open(filename, "rb")
     ba = bytearray(f.read())
 
@@ -18,8 +19,7 @@ def load_streets(bt_dir):
 
 
 def load_item_data(bt_dir):
-    import os
-    filename = os.path.join(bt_dir, "MEMDUMP.BIN")
+    filename = os.path.join(bt_dir, "bard.exe")
     f = open(filename, "rb")
     ba = bytearray(f.read())
     num = 128
