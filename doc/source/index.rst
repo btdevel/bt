@@ -12,6 +12,8 @@ Contents:
    :maxdepth: 2
 
    file_formats
+   msdos
+   amiga
 
 Indices and tables
 ==================
