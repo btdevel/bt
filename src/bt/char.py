@@ -1,33 +1,30 @@
 # this module contains just some ideas, nothing of which is finished yet
 
-class CharClass(object):
-    pass
+class CharacterClass(object):
+    classes = []
+    def __init__(self, id, name):
+        self.id = id
+        self.name = name
 
 #warrior = CharClass( "Warrior", exp_needed, hp_per_level, magic, class_change, 
 #                     modifiers, spell_table)
 
-class CharRace(object):
-    pass
+class CharacterRace(object):
+    races = []
+    def __init__(self, id, name):
+        self.id = id
+        self.name = name
 
 #elf = CharRace( "Elf", modifiers )
 
 
 class Character(object):
-    pass
+    def __init__(self):
+        pass
 
-#c = Character("EL CID", class=warrior, race=elf, str=10, dex=5)
-#c.gold
-#c.equipment
-#c.equipped
 
 class Party(object):
-    pass
+    def __init__(self):
+        pass
 
-#party.add_character( c )
 
-class GameState:
-    pass
-
-#state.map
-#state.party
-#state.enemies (if in combat)

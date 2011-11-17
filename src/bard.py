@@ -1,6 +1,6 @@
-from bt.city import CityUI, make_city_map
-from bt.buildings import guild
-from bt.ui import UI
+from bt.game.city import CityUI, make_city_map
+from bt.game.buildings import guild
+from bt.game.ui import UI
 
 res_path = '../res/image'
 bt_path = '../res/msdos/bt1'
