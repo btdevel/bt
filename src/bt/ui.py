@@ -40,7 +40,7 @@ class UI(EventHandler):
         pygame.quit()
 
     def redraw(self):
-        self.state.current.redraw(self.state)
+        self.state.curr_handler.redraw(self.state)
 
     def blitim(self, filename):
         im = pygame.image.load(os.path.join(self.resdir, filename))
@@ -61,9 +61,9 @@ class UI(EventHandler):
                     pass
                 elif event.type == pygame.KEYDOWN:
                     key = (event.key, event.mod)
-                    used = state.current.key_event(state, key)
+                    used = state.curr_handler.key_event(state, key)
                     if not used and hasattr(event, "unicode"):
-                        used = state.current.key_event(state, event.unicode)
+                        used = state.curr_handler.key_event(state, event.unicode)
                     if not used:
                         used = self.key_event(state, key)
                     if not used and hasattr(event, "unicode"):

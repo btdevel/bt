@@ -11,8 +11,8 @@ class InsideBuildingUI(EventHandler):
         self.message = message
 
     def exit_building(self, state):
-        state.map.reverse(state)
-        state.set_current(state.map, redraw=True)
+        state.city_handler.reverse(state)
+        state.enter_city()
 
     def redraw(self, state):
         state.ui.blitim(self.filename)
@@ -146,10 +146,8 @@ class GuildUI(InsideBuildingUI):
 
     def enter_city(self, state):
         from bt.movement import Direction
-        state.map.set_position(25, 15)
-        state.map.set_direction(Direction.NORTH)
         # TODO: reload map, set time to early morning
-        state.set_current(state.map, redraw=True)
+        state.enter_city([25, 15], Direction.NORTH)
 
 
 guild = GuildUI("inside/guild.png", """Thou art in the Guild of Adventurers.

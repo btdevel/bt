@@ -5,22 +5,36 @@ from bt.extract.item_data import load_streets
 from bt.movement import Direction, Vector
 from bt.ui import EventHandler
 
-class Street(object):
-    def __init__(self, name=""):
+class ActionContainer(object):
+    def __init__(self, action=None):
+        if action is None:
+            action = self.do_nothing
+        self.action = action
+    def do_nothing(self, state):
+        pass
+    def not_implemented(self, state):
+        state.ui.message("This feature is not yet implemented.")
+
+
+class Street(ActionContainer):
+    def __init__(self, name="", action=None):
+        ActionContainer.__init__(self, action)
         self.name = name
     def __str__(self):
         return self.name
     def is_building(self):
         return False
 
-class Building(object):
-    def __init__(self, type, front=None, action=None):
+class Building(ActionContainer):
+    def __init__(self, type, entry_handler, front=None):
+        ActionContainer.__init__(self, self.enter_building)
         self.type = type
         self.front = front
-        self.action = action
-
+        self.entry_handler = entry_handler
     def is_building(self):
         return True
+    def enter_building(self, state):
+        state.set_handler(self.entry_handler, redraw=True)
 
 class CityMap(object):
     def __init__(self, strmap, repl):
@@ -94,8 +108,8 @@ class CityUI(EventHandler):
         state.ui.update_display()
 
 
-    def set_position(self, x, y):
-        self.pos = Vector([x, y])
+    def set_position(self, pos):
+        self.pos = Vector(pos)
 
     def set_direction(self, dir):
         if not isinstance(dir, Direction):
@@ -108,8 +122,9 @@ class CityUI(EventHandler):
         if not cell.is_building():
             self.pos = self.pos + self.dir.forward_vec
             self.redraw(state)
-        else:
-            state.set_current(cell.action, redraw=True)
+        cell.action(state)
+#        else:
+#            state.set_current(cell.action, redraw=True)
 
     def reverse(self, state):
         self.dir.reverse()
@@ -125,6 +140,7 @@ class CityUI(EventHandler):
 
     def print_location(self, state):
         state.ui.message("You are on %s facing %s." % (self.map[self.pos], str(self.dir)))
+        state.ui.message(str(self.pos))
 
 
 def make_city_map(btpath):
@@ -135,24 +151,24 @@ def make_city_map(btpath):
     strmap = [binmap[i * 30:(i + 1) * 30] for i in xrange(30)]
     ustreet = Street("Unknown")
     repl = {0x00: ustreet,
-            0x01: Building('house1', action=bld.empty),
-            0x02: Building('house2', action=bld.empty),
-            0x03: Building('house3', action=bld.empty),
-            0x04: Building('house4', action=bld.empty),
-            0x0B: Building('house3', 'city/guild.png', action=bld.guild), # Adventurer's Guild
-            0x12: Building('house2', 'city/pub.png', action=bld.pub), # Pub/Inn
-            0x1C: Building('house4', 'city/shop.png', action=bld.shop), # Garth's Shop
-            0x21: Building('house1', 'city/temple.png', action=bld.temple), # Temple
-            0x2B: Building('house3', action=bld.review), # "R", # Review Board
+            0x01: Building('house1', bld.empty),
+            0x02: Building('house2', bld.empty),
+            0x03: Building('house3', bld.empty),
+            0x04: Building('house4', bld.empty),
+            0x0B: Building('house3', bld.guild, 'city/guild.png'), # Adventurer's Guild
+            0x12: Building('house2', bld.pub, 'city/pub.png'), # Pub/Inn
+            0x1C: Building('house4', bld.shop, 'city/shop.png'), # Garth's Shop
+            0x21: Building('house1', bld.temple, 'city/temple.png'), # Temple
+            0x2B: Building('house3', bld.review), # "R", # Review Board
             0x60: Street("Statue here"), # Statue
             0x68: Street("Iron Gate"), # Gate to Tower
-            0x71: Building('house1', 'city/temple.png', action=bld.madgod), # Catacombs/Mad God Temple
+            0x71: Building('house1', bld.madgod, 'city/temple.png'), # Catacombs/Mad God Temple
             0x78: Street("Sewer entrance"), # Stairs from Sewers
-            0x81: Building('house1', action=bld.credits), # Interplay Credits
-            0x89: Building('house1', action=bld.roscoes), # Roscoe's Energy Emporium
-            0x91: Building('house1', action=bld.kylearan), # Kylearan's Tower
-            0x9B: Building('house1', action=bld.harkyn), # Harkyn's Castle *get front
-            0xA1: Building('house1', action=bld.mangar), # Mangar's Tower
+            0x81: Building('house1', bld.credits), # Interplay Credits
+            0x89: Building('house1', bld.roscoes), # Roscoe's Energy Emporium
+            0x91: Building('house1', bld.kylearan), # Kylearan's Tower
+            0x9B: Building('house1', bld.harkyn), # Harkyn's Castle *get front
+            0xA1: Building('house1', bld.mangar), # Mangar's Tower
             0xA8: Street("City Gates"), # City Gates
             }
 
@@ -171,6 +187,15 @@ def make_city_map(btpath):
                     name = "Unknown"
 
                 cmap.map[j][i] = Street(name)
+
+    def teleport(state):
+        state.enter_city(pos=[25, 6])
+
+    endless = cmap[25, 3]
+    endless = Street(endless.name, action=teleport)
+    cmap.map[3][25] = endless
+
+#    25,3 => 25, 6
     return cmap
 
 #
