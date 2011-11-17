@@ -1,8 +1,3 @@
-'''
-Created on 12.11.2011
-
-@author: ezander
-'''
 import pygame
 import os
 
@@ -27,11 +22,12 @@ class UI(EventHandler):
     def init(self):
         pygame.display.init()
         pygame.display.set_mode((640, 480))
+        pygame.key.set_repeat(200,200)
+
         s = pygame.display.get_surface()
         main = pygame.image.load(os.path.join(self.resdir, 'main.png'))
         s.blit(main, (0, 0))
         pygame.display.flip()
-        self.s = s
 
     def request_exit(self, state):
         state.running = False
@@ -43,8 +39,9 @@ class UI(EventHandler):
         self.state.curr_handler.redraw(self.state)
 
     def blitim(self, filename):
+        s = pygame.display.get_surface()
         im = pygame.image.load(os.path.join(self.resdir, filename))
-        self.s.blit(im, (33, 30))
+        s.blit(im, (33, 30))
 
     def update_display(self):
         pygame.display.flip()

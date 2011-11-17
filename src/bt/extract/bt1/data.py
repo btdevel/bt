@@ -12,7 +12,7 @@ def load_strings_by_identifier(bt_path, identifier, num):
 
 def load_street_names(bt_path):
     streets = load_strings_by_identifier(bt_path, 'Alley\x00Rakhir', 20)
-    streets += [None, ] * (0xFF - len(streets))
+    streets += [None, ] * (0x100 - len(streets))
     streets[0xFF] = "Grand Plaz"
     return streets
 

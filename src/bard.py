@@ -2,7 +2,7 @@ from bt.game.city import CityUI, make_city_map
 from bt.game.buildings import guild
 from bt.game.ui import UI
 
-res_path = '../res/image'
+res_path = '../res/image/bt1'
 bt_path = '../res/msdos/bt1'
 
 class State:

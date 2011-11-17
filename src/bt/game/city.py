@@ -1,7 +1,7 @@
 import os
 import pygame
 
-from bt.extract.item_data import load_streets
+from bt.extract.bt1.data import load_street_names
 from bt.game.movement import Direction, Vector
 from bt.game.ui import EventHandler
 
@@ -80,7 +80,7 @@ class CityUI(EventHandler):
         state.ui.blitim(filename)
 
     def redraw(self, state):
-        s = state.ui.s
+        s = pygame.display.get_surface()
         if self.isbuildingat(1):
             pygame.draw.rect(s, pygame.Color(0, 0, 119),
                               pygame.Rect(33, 30, 224, 92 + 84))
@@ -173,7 +173,7 @@ def make_city_map(btpath):
             }
 
     nammap = read_city_name(btpath)
-    streets = load_streets(btpath)
+    streets = load_street_names(btpath)
     cmap = CityMap(strmap, repl)
     for i in xrange(30):
         for j in xrange(30):
