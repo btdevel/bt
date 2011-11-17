@@ -76,8 +76,20 @@ def decode_from_offset(inp, offset, endians=(GUESS, GUESS)):
 
 def load_file(name, path="."):
     filename = os.path.join(path, name)
-    inp = bytearray(open(filename).read())
-    return inp
+    filename = filename.replace('/', os.path.sep)
+    with open(filename, "rb") as f:
+        ba = bytearray(f.read())
+    return ba
+
+_binary_cache = {}
+def load_file_cached(name, path):
+    global _binary_cache
+    data = _binary_cache.get((name, path))
+    if data is None:
+        data = load_file(name, path)
+        _binary_cache[(name, path)] = data
+    return data
+
 
 def load_compressed_file(name, path=".", endians=(GUESS, GUESS)):
     inp = load_file(name, path)
