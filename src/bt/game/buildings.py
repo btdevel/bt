@@ -284,3 +284,11 @@ Joe Ybarra
 """)
 
 
+class TurnBackHandler(InsideBuildingUI):
+    def exit_building(self, state):
+        state.city_handler.reverse(state)
+        state.city_handler.forward(state)
+        state.enter_city()
+
+statue = TurnBackHandler("city/statue.png", "You see a statue here.")
+iron_gate = TurnBackHandler("city/gate.png", "You stand before an iron gate.")

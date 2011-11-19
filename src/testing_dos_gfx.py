@@ -52,11 +52,13 @@ if True:
     #data = btfile.load_indexed_file("bigpic", msdos_bt1_path)
     data0 = btfile.load_indexed_file("bigpic", msdos_bt1_path, index=3)
 
+    print
     for i, c  in enumerate(list(data0)):
         if i % 16 == 0: print
         print hex(c),
-        if i > 256: break
-
+        #if i > 256: break
+    print
+if False:
     data = []
     mult = 1
     for c in data0:
@@ -75,7 +77,7 @@ if True:
     # btimage.save_8bit_image(data, (w, h), pal64, "bigpic0-foo.png")
 
 
-if True:
+if False:
     # works
     parts = [(56, 88), (192, 86), (120, 54), (80, 33), (48, 17),
              (16, 40), # unclear

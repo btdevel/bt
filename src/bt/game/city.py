@@ -46,6 +46,17 @@ class CityMap(object):
         except:
             return None
 
+    def __setitem__(self, pt, item):
+        self.map[pt[1]][pt[0]] = item
+
+    def set_action(self, pt, action):
+        import copy
+        cell = copy.copy(self[pt])
+        cell.action = action
+        self[pt] = cell
+
+
+
 class CityUI(EventHandler):
     def __init__(self, map):
         EventHandler.__init__(self)
@@ -188,14 +199,37 @@ def make_city_map(btpath):
 
                 cmap.map[j][i] = Street(name)
 
-    def teleport(state):
-        state.enter_city(pos=[25, 6])
+    def one_time_only_action(action):
+        first = [True]
+        def new_action(state):
+            if first[0]:
+                action(state)
+                first[0] = False
+        return new_action
 
-    endless = cmap[25, 3]
-    endless = Street(endless.name, action=teleport)
-    cmap.map[3][25] = endless
+    def message_action(msg):
+        def message(state):
+            state.ui.message(msg)
+        return message
 
-#    25,3 => 25, 6
+    def teleport_action(pos):
+        def teleport(state):
+            state.enter_city(pos=pos)
+        return teleport
+
+    def enter_action(handler):
+        def execute(state):
+            state.set_handler(handler, redraw=True)
+        return execute
+
+
+    cmap.set_action([25, 18], message_action("Garth shop is to the right"))
+    cmap.set_action([25, 16], one_time_only_action(message_action("the shoppe is ahead")))
+    cmap.set_action([25, 3], teleport_action([25, 6]))
+
+    cmap.set_action([27, 25], enter_action(bld.iron_gate))
+    cmap.set_action([27, 6], enter_action(bld.statue))
+
     return cmap
 
 #
