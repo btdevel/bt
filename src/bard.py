@@ -19,13 +19,7 @@ class State:
         self.curr_handler = curr
         self.ui.redraw()
 
-    def enter_city(self, pos=None, dir=None):
-        if pos is not None:
-            self.city_handler.set_position(pos)
-        if dir is not None:
-            self.city_handler.set_direction(dir)
-
-        self.set_handler(self.city_handler)
+    def redraw(self):
         self.ui.redraw()
 
 State().run()

@@ -1,11 +1,17 @@
 import pygame
 import os
 
+import bt.game.messages as messages
+
 class EventHandler(object):
     def __init__(self):
         self.keymap = {}
     def add_key_event(self, key, action):
-        self.keymap[key] = action
+        if isinstance(key, str):
+            for c in key:
+                self.keymap[c] = action
+        else:
+            self.keymap[key] = action
     def key_event(self, state, key):
         if key in self.keymap:
             self.keymap[key](state)
@@ -13,16 +19,21 @@ class EventHandler(object):
         return False
 
 
+
 class UI(EventHandler):
     def __init__(self, resdir):
         EventHandler.__init__(self)
         self.resdir = resdir
         self.add_key_event((pygame.K_q, pygame.KMOD_LCTRL), self.request_exit)
+        self.message_pane = messages.MessagePane(pygame.Rect(340, 30, 264, 198))
+
 
     def init(self):
         pygame.display.init()
-        pygame.display.set_mode((640, 480))
-        pygame.key.set_repeat(200,200)
+        pygame.font.init()
+
+        pygame.display.set_mode((640, 400))
+        pygame.key.set_repeat(200, 200)
 
         s = pygame.display.get_surface()
         main = pygame.image.load(os.path.join(self.resdir, 'main.png'))
@@ -36,6 +47,7 @@ class UI(EventHandler):
         pygame.quit()
 
     def redraw(self):
+        self.message_pane.clear()
         self.state.curr_handler.redraw(self.state)
 
     def blitim(self, filename):
@@ -75,6 +87,15 @@ class UI(EventHandler):
 
         self.cleanup()
 
-    def message(self, text, clear=True):
-        # clear is ignored for now
-        print(text)
+
+    def clear_message(self):
+        self.message_pane.clear()
+
+    def clear_view(self):
+        s = pygame.display.get_surface()
+        pygame.draw.rect(s, pygame.Color(0, 0, 119),
+                            pygame.Rect(33, 30, 224, 92 + 84))
+        # no update        
+
+    def message(self, msg):
+        self.message_pane.message(msg)

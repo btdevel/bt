@@ -1,41 +1,40 @@
 import pygame
 from bt.game.ui import EventHandler
+import bt.game.action as action
 
-class InsideBuildingUI(EventHandler):
-    def __init__(self, filename, message):
+class DefaultBuildingHandler(EventHandler):
+    def __init__(self, filename, message, exit_action=action.exit_building()):
         EventHandler.__init__(self)
-        self.add_key_event((pygame.K_ESCAPE, 0), self.exit_building)
-        self.add_key_event("e", self.exit_building)
-        self.add_key_event("E", self.exit_building)
+        self.add_key_event((pygame.K_ESCAPE, 0), exit_action)
+        self.add_key_event("eE", exit_action)
         self.filename = filename
         self.message = message
 
-    def exit_building(self, state):
-        state.city_handler.reverse(state)
-        state.enter_city()
 
     def redraw(self, state):
+        state.ui.clear_view()
         state.ui.blitim(self.filename)
         state.ui.update_display()
         # this should go into some "enter" method
+        state.ui.clear_message()
         state.ui.message(self.message)
         state.ui.message("     (EXIT)")
 
-class EmptyBuildingUI(InsideBuildingUI):
+class EmptyBuildingHandler(DefaultBuildingHandler):
     def __init__(self, filename, message):
-        InsideBuildingUI.__init__(self, filename, message)
+        DefaultBuildingHandler.__init__(self, filename, message)
 
     def key_event(self, state, key):
         if EventHandler.key_event(self, state, key):
             return True
-        self.exit_building(state)
+        action.exit_building()(state)
         return True
 
-empty = EmptyBuildingUI("inside/empty.png", "You're in an empty building.")
+empty = EmptyBuildingHandler("inside/empty.png", "You're in an empty building.")
 
-stable = EmptyBuildingUI("inside/empty.png", "Sorry, friends, all the horses have been eaten by creatures!")
+stable = EmptyBuildingHandler("inside/empty.png", "Sorry, friends, all the horses have been eaten by creatures!")
 
-temple = InsideBuildingUI("inside/temple.png", "Welcome, oh weary ones, to our humble temple. Who needeth healing?")
+temple = DefaultBuildingHandler("inside/temple.png", "Welcome, oh weary ones, to our humble temple. Who needeth healing?")
 # is in bad shape, indeed. It will cost 
 #The priests lay hands on him...
 #...and he is healed!
@@ -50,7 +49,7 @@ temple = InsideBuildingUI("inside/temple.png", "Welcome, oh weary ones, to our h
 #Greatest gods
 #Mad God
 
-madgod = InsideBuildingUI("inside/temple.png", "This is the temple of the Mad God. What is thy business, unbeliever?")
+madgod = DefaultBuildingHandler("inside/temple.png", "This is the temple of the Mad God. What is thy business, unbeliever?")
 #TARJAN
 #Speak to priest
 #Only those who know the name of the Mad One are welcome.
@@ -59,7 +58,7 @@ madgod = InsideBuildingUI("inside/temple.png", "This is the temple of the Mad Go
 #"Speak not the name of the High One so loudly, lest he awaken," the priest says. "Enter the catacombs, believer."
 
 
-shop = InsideBuildingUI("inside/shop.png", "Welcome to Garth's Equipment Shoppe, oh wealthy travellers!")
+shop = DefaultBuildingHandler("inside/shop.png", "Welcome to Garth's Equipment Shoppe, oh wealthy travellers!")
 #The shoppe is closed at night.
 #The Shoppe
 #Which of you is interested in my fine wares?
@@ -79,7 +78,7 @@ shop = InsideBuildingUI("inside/shop.png", "Welcome to Garth's Equipment Shoppe,
 #Done!>
 
 
-pub = InsideBuildingUI("inside/pub.png", "Hail, travelers! Step to the bar and I'll draw you a tankard.")
+pub = DefaultBuildingHandler("inside/pub.png", "Hail, travelers! Step to the bar and I'll draw you a tankard.")
 #"The guardians can be deadly," the barkeep smirks.
 #"A taste of wine might turn to ready adventure," the barkeep chuckles.
 #"Look for the Review Board on Trumpet Street," the barkeep whispers.
@@ -115,16 +114,17 @@ pub = InsideBuildingUI("inside/pub.png", "Hail, travelers! Step to the bar and I
 #Drawnblade
 #Tavern
 
-class GuildUI(InsideBuildingUI):
+class GuildHandler(DefaultBuildingHandler):
     def __init__(self, filename, message):
-        InsideBuildingUI.__init__(self, filename, message)
-        self.add_key_event("a", self.add_member)
-        self.add_key_event("r", self.remove_member)
-        self.add_key_event("c", self.create_member)
-        self.add_key_event("d", self.delete_member)
-        self.add_key_event("s", self.save_party)
-        self.add_key_event("l", self.leave_game)
-        self.add_key_event("e", self.enter_city)
+        from bt.game.movement import Direction
+        DefaultBuildingHandler.__init__(self, filename, message)
+        self.add_key_event("aA", self.add_member)
+        self.add_key_event("rR", self.remove_member)
+        self.add_key_event("cC", self.create_member)
+        self.add_key_event("dD", self.delete_member)
+        self.add_key_event("sS", self.save_party)
+        self.add_key_event("lL", self.leave_game)
+        self.add_key_event("eE", action.enter_city(pos=[25, 15], newdir=Direction.NORTH))
 
     def add_member(self, state):
         state.ui.message("Not implemented yet.")
@@ -144,13 +144,9 @@ class GuildUI(InsideBuildingUI):
     def leave_game(self, state):
         state.running = False
 
-    def enter_city(self, state):
-        from bt.game.movement import Direction
-        # TODO: reload map, set time to early morning
-        state.enter_city([25, 15], Direction.NORTH)
 
 
-guild = GuildUI("inside/guild.png", """Thou art in the Guild of Adventurers.
+guild = GuildHandler("inside/guild.png", """Thou art in the Guild of Adventurers.
 
 Add member
 Remove member
@@ -191,7 +187,7 @@ Enter the city
 #Error trying to find 
 #Sorry, I got a disk error trying to read him in.
 
-review = InsideBuildingUI("inside/review.png", """Wouldst thou like to be reviewed for:
+review = DefaultBuildingHandler("inside/review.png", """Wouldst thou like to be reviewed for:
 
 Advancement
 Spell Acquiring
@@ -228,30 +224,31 @@ Class Change
 #prior to advancement...
 # hath earned a level of advancement...
 
-roscoes = InsideBuildingUI("inside/roscoes.png", """Welcome, my friends, to Roscoe's Energy Emporium. 
+roscoes = DefaultBuildingHandler("inside/roscoes.png", """Welcome, my friends, to Roscoe's Energy Emporium. 
 Who needeth spell points restored?""")
 #Roscoe's
 #restoration.
 # has some definite spell point problems. It will cost 
 #Roscoe re-energizes him.
 
-harkyn = InsideBuildingUI("inside/empty.png", """This is the entry chamber to Harkyn's Castle. 
-It is not guarded, but a sign 
-threatens trespassers with death. You can:
+harkyn = DefaultBuildingHandler("inside/castle.png", """This is the entry chamber to Harkyn's Castle. 
+It is not guarded, but a sign threatens trespassers with death. 
+You can:
 
 Take stairs up"""
 )
 #Castle
 
-kylearan = InsideBuildingUI("inside/empty.png", """This is the entry chamber to Kylearan's Amber Tower. 
-A stairwell leads up 
-to a lofty level of chambers. You can:
+kylearan = DefaultBuildingHandler("inside/empty.png", """This is the entry chamber to Kylearan's Amber Tower. 
+A stairwell leads up to a lofty level of chambers.
+You can:
 
 Take stairs""")
 #Amber Tower
 
-mangar = InsideBuildingUI("inside/empty.png", """This is the entry chamber to Mangar's Tower. A stairwell leads up to the 
-first level of traps and terrors. You can:
+mangar = DefaultBuildingHandler("inside/empty.png", """This is the entry chamber to Mangar's Tower. 
+A stairwell leads up to the first level of traps and terrors. 
+You can:
 
 Take stairs""")
 #Magic mouth
@@ -260,7 +257,7 @@ Take stairs""")
 #The Tower
 
 
-credits = InsideBuildingUI("inside/credits.png", """THE BARD'S TALE IBM was from an original design by Michael Cranford.
+credits = DefaultBuildingHandler("inside/credits.png", """\n\n\n\n\n\n\n\n\nTHE BARD'S TALE IBM was from an original design by Michael Cranford.
 
 It was created at Interplay Productions, in Newport Beach, California.
 
@@ -284,11 +281,39 @@ Joe Ybarra
 """)
 
 
-class TurnBackHandler(InsideBuildingUI):
-    def exit_building(self, state):
-        state.city_handler.reverse(state)
-        state.city_handler.forward(state)
-        state.enter_city()
+class TurnBackHandler(DefaultBuildingHandler):
+    def __init__(self, filename, message, display=""):
+        DefaultBuildingHandler.__init__(self, filename, message, exit_action=action.turn_back())
 
-statue = TurnBackHandler("city/statue.png", "You see a statue here.")
-iron_gate = TurnBackHandler("city/gate.png", "You stand before an iron gate.")
+class IronGateHandler(TurnBackHandler):
+    def __init__(self, filename, message, display=""):
+        DefaultBuildingHandler.__init__(self, filename, message, exit_action=action.turn_back())
+
+class GuardianHandler(EventHandler):
+    def __init__(self, filename, message, display=None):
+        EventHandler.__init__(self)
+        self.add_key_event("lL", action.turn_back())
+        self.add_key_event("aA", action.compose(action.enter_city(), action.message("The statue gives up...")))
+        self.filename = filename
+        self.message = message
+
+    def redraw(self, state):
+        state.ui.clear_view()
+        state.ui.blitim(self.filename)
+        state.ui.update_display()
+        # this should go into some "enter" method
+        state.ui.clear_message()
+        state.ui.message(self.message)
+
+
+statue = GuardianHandler("city/statue.png", """You stand before a gate, which is guarded by the statue of a XYZ. You can:
+Attack it.
+Leave it.""", display="Guardian")
+
+
+iron_gate_mangar = IronGateHandler("city/gate.png", "You stand before an iron gate, beyond which stands Mangar's tower.", display="Iron Gate")
+iron_gate_kylearan = IronGateHandler("city/gate.png", "You stand before an iron gate, beyond which stands Kylearan's tower.", display="Iron Gate")
+
+city_gate = TurnBackHandler("city/city_gate.png", "You stand before the city gates, which are blocked by a gigantic snow drift.", display="")
+
+

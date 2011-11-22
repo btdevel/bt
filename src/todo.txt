@@ -1,0 +1,11 @@
+make view_pane (world_view?)
+
+when is the screen flipped/updated?
+
+get events one at a time (reduce load)
+
+make gates work
+
+add confobj
+
+
