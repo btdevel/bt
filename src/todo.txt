@@ -6,6 +6,5 @@ get events one at a time (reduce load)
 
 make gates work
 
-add confobj
 
 

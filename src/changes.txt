@@ -1,7 +1,7 @@
-
-bt v0.2
-=======
 Teleport on Sinister
+
 Messages in message pane, with automatic text breaking and smooth scrolling (see credits)
+
 City gates, iron gates (impassable), Statues (vanish for one move when attacked)
+
 Added Castle inside and outside, removed some gfx glitches in the city

@@ -16,16 +16,12 @@ def split_into_lines(text, width_ok_func):
 
 class MessagePane():
     def __init__(self, rect, bgcolor=(255, 255, 255)):
-        self.outer = rect.copy()
+        self.outer = rect.move(0,0)
         self.bgcolor = bgcolor
         self.sidesep = 6
         self.topsep = 4
-        self.linesep = 0
-        self.rect = rect.copy()
-        self.rect.left += self.sidesep
-        self.rect.top += self.topsep
-        self.rect.width -= 2 * self.sidesep
-        self.rect.height -= 2 * self.topsep
+        self.linesep = -7
+        self.rect = rect.inflate(-self.sidesep, -self.topsep)
         self.pos = self.rect.topleft
         self.fgcolor = (60, 20, 20)
         self.fontname = None

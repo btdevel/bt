@@ -29,13 +29,14 @@ def print_4bit_image(data, size):
         print
 
 def save_8bit_image(data, size, palette, dest=None):
+    data = data[:size[0]*size[1]] # make optional
     raw_rgb = pal2rgb(data, palette)
     img = pygame.image.fromstring(str(raw_rgb), size, "RGB")
     if dest:
         pygame.image.save(img, dest)
     return img
 
-def save_separated_image(data, size, dest=None):
+def save_4bit_separated_image(data, size, dest=None):
     raw = bytearray(size[0] * size[1])
     bit = lambda b, i: (b >> i) & 1
     vdist = size[1] * (size[0] // 8)
@@ -48,7 +49,7 @@ def save_separated_image(data, size, dest=None):
             b2 = bit(data[ind + 2 * vdist], nb)
             b3 = bit(data[ind + 3 * vdist], nb)
             raw[i + j * size[0]] = (b3 << 3) + (b2 << 2) + (b1 << 1) + (b0 << 0)
-    return save_8bit_image(raw, (size[0], size[1]), palette_ega16(), dest)
+    return save_8bit_image(raw, (size[0], size[1]), palette_cga16(), dest)
 
 def save_4bit_partitioned_image(data, parts, pal, namepattern):
     for part in range(len(parts)):
@@ -76,7 +77,24 @@ def palette_grey256():
         pal.append(bytearray([i, i, i]))
     return pal
 
-def palette_ega16():
+def palette_cga8(palnum, high):
+    pal16 = palette_cga16()
+
+    if (palnum, high)==(0, False):
+        ind = [0, 2, 4, 6]
+    elif (palnum, high)==(0, True):
+        ind = [0, 10, 12, 14]
+    elif (palnum, high)==(1, False):
+        ind = [0, 3, 5, 7]
+    elif (palnum, high)==(1, True):
+        ind = [0, 11, 13, 15]
+    else:
+        # use 1, False as default (should give a warning)
+        ind = [0, 3, 5, 7]
+    return [pal16[j] for j in ind]
+
+
+def palette_cga16():
     ega_pal = palette_ega64()
     pal = [ega_pal[0],
            ega_pal[1],
