@@ -24,13 +24,37 @@ class MessagePane():
         self.rect = rect.inflate(-self.sidesep, -self.topsep)
         self.pos = self.rect.topleft
         self.fgcolor = (60, 20, 20)
+        self.fgcolor = (0, 0, 0)
         self.fontname = None
         self.fontsize = 14
         self.smooth = True
         self.delay = 25
         self.font = None
 
+        pygame.font.init()
+        fontfilename = "/home/ezander/Downloads/btdist/res/font/COMMOD64.TTF"
+
+        fontfilename = "/home/ezander/Downloads/btdist/res/font/CBM-6420.TTF"
+        self.fontsize = 12
+        self.linesep = 0
+
+        fontfilename = "/home/ezander/Downloads/btdist/res/font/CBM-64.TTF"
+        self.fontsize = 14
+        self.linesep = 0
+
+        fontfilename = "/home/ezander/Downloads/btdist/res/font/CBM-6480.TTF"
+        self.fontsize = 20
+        self.linesep = 0
+
+        fontfilename = "/home/ezander/Downloads/btdist/res/font/c64.ttf"
+        self.fontsize = 14
+        self.linesep = 0
+        self.font = pygame.font.Font(fontfilename, self.fontsize)
+        self.foo = 1
+
     def clear(self):
+        print "clearing", self.foo
+        self.foo += 1
         s = pygame.display.get_surface()
         pygame.draw.rect(s, self.bgcolor, self.rect)
         self.pos = self.rect.topleft
@@ -39,10 +63,11 @@ class MessagePane():
 
     def _scroll_up(self, surf, y, dy, ds):
         sub = surf.subsurface(self.rect)
-        sub.scroll(0, -ds)
+        if hasattr(sub, "scroll"):
+            sub.scroll(0, -ds)
         y -= ds
         dy = self.rect.bottom - y
-        rect = self.rect.copy()
+        rect = self.rect.move(0,0)
         rect.top = y
         rect.height = dy
         pygame.draw.rect(surf, self.bgcolor, rect)
@@ -53,10 +78,10 @@ class MessagePane():
         if self.font:
             return self.font
         if self.fontname is None:
-            fontname = pygame.font.get_default_font()
+            fontfilename = pygame.font.get_default_font()
         else:
-            fontname = pygame.font.match_font(self.fontname)
-        self.font = pygame.font.Font(fontname, self.fontsize)
+            fontfilename = pygame.font.match_font(self.fontname)
+        self.font = pygame.font.Font(fontfilename, self.fontsize)
         return self.font
 
     def message(self, msg):
@@ -86,3 +111,4 @@ class MessagePane():
                 pygame.display.update(self.rect)
                 y += dy
         self.pos = x, y
+        pygame.display.flip()
