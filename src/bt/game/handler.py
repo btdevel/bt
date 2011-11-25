@@ -40,3 +40,46 @@ class DefaultBuildingHandler(ImageDisplayHandler):
             msg.message(self.message)
             msg.message("     (EXIT)")
         print "building message printed"
+
+class MultiScreenHandler(ImageDisplayHandler):
+    def __init__(self, filename):
+        ImageDisplayHandler.__init__(self, filename)
+        self.screens = {}
+        self.current = None
+
+    def add_screen(self, name, screen):
+        if self.current is None:
+            self.current = screen
+        self.screens[name] = screen
+        screen.set_parent(self)
+    def set_screen(self, state, name):
+        state.ui.message_pane.clear()
+        self.current = self.screens[name]
+        self.current.redraw(state)
+    def key_event(self, state, key):
+        return self.current.key_event(state, key)
+    def redraw(self, state):
+        ImageDisplayHandler.redraw(self, state)
+        state.ui.message_pane.clear()
+        self.current.redraw(state)
+
+
+class Screen(EventHandler):
+    def __init__(self):
+        EventHandler.__init__(self)
+        self.msg = ""
+        self.parent = None
+    def set_parent(self, parent):
+        assert self.parent is None
+        self.parent = parent
+
+    def add_message(self, text):
+        if self.msg == "":
+            self.msg = text
+        else:
+            self.msg += "\n" + text
+    def add_option(self, text, keys, action):
+        self.add_message(text)
+        self.add_key_event(keys, action)
+    def redraw(self, state):
+        state.ui.message_pane.message(self.msg)
