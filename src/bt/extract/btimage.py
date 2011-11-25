@@ -2,6 +2,24 @@ import pygame
 import bt.extract.btfile as btfile
 
 
+def show(im):
+    pygame.init()
+    pygame.display.init()
+    pygame.font.init()
+
+    pygame.display.set_mode(im.get_size())
+    s = pygame.display.get_surface()
+    s.blit(im, (0, 0))
+    pygame.display.flip()
+    stop = False
+    while not stop:
+        for event in pygame.event.get():
+            if event.type == pygame.KEYDOWN:
+                stop = True
+            elif event.type == pygame.QUIT:
+                stop = True
+    pygame.display.quit()
+
 def pal2rgb(raw_pal, pal):
     raw_rgb = bytearray(3 * len(raw_pal))
     for i, b in enumerate(raw_pal):
@@ -13,6 +31,15 @@ def expand_4bit(data):
     for i, b in enumerate(data):
         raw[2 * i] = b >> 4
         raw[2 * i + 1] = b & 0x0F
+    return raw
+
+def expand_2bit(data):
+    raw = bytearray(4 * len(data))
+    for i, b in enumerate(data):
+        raw[4 * i + 0] = (b >> 6) & 0x03
+        raw[4 * i + 1] = (b >> 4) & 0x03
+        raw[4 * i + 2] = (b >> 2) & 0x03
+        raw[4 * i + 3] = (b >> 0) & 0x03
     return raw
 
 def save_4bit_image(data, size, palette, dest=None):
@@ -28,10 +55,25 @@ def print_4bit_image(data, size):
             ind += 1
         print
 
+def double_scale(data, size, n):
+    w, h = size[0], size[1]
+    buffer = bytearray(4 * w * h)
+    for i in xrange(h):
+        for j in xrange(w):
+            src = (i * w + j) * n
+            dst = (4 * i * w + 2 * j) * n
+            buffer[dst:dst + 2 * n] = data[src:src + n] * 2
+            dst = ((4 * i + 2) * w + 2 * j) * n
+            buffer[dst:dst + 2 * n] = data[src:src + n] * 2
+    return buffer, (2 * w, 2 * h)
+
+
 def save_8bit_image(data, size, palette, dest=None):
-    data = data[:size[0]*size[1]] # make optional
+    data = data[:size[0] * size[1]] # make optional
+    data, size = double_scale(data, size, 1)
     raw_rgb = pal2rgb(data, palette)
     img = pygame.image.fromstring(str(raw_rgb), size, "RGB")
+
     if dest:
         pygame.image.save(img, dest)
     return img
@@ -65,6 +107,16 @@ def save_4bit_partitioned_image(data, parts, pal, namepattern):
         subdata = data[s // 2:(s + w * h) // 2]
         save_4bit_image(subdata, (w, h), pal, namepattern % part)
 
+def save_2bit_interlaced_image(data, size, palette, dest=None):
+    raw_pal = expand_2bit(data)
+    w, h = size[0], size[1]
+    buffer = bytearray(w * h)
+    d = len(raw_pal) // 2
+    for i in xrange(h):
+        start = (i % 2) * d + (i // 2) * w
+        buffer[i * w:i * w + w] = raw_pal[start:start + w]
+    return save_8bit_image(buffer, size, palette, dest)
+
 def palette_grey16():
     pal = []
     for i in xrange(16):
@@ -80,13 +132,13 @@ def palette_grey256():
 def palette_cga8(palnum, high):
     pal16 = palette_cga16()
 
-    if (palnum, high)==(0, False):
+    if (palnum, high) == (0, False):
         ind = [0, 2, 4, 6]
-    elif (palnum, high)==(0, True):
+    elif (palnum, high) == (0, True):
         ind = [0, 10, 12, 14]
-    elif (palnum, high)==(1, False):
+    elif (palnum, high) == (1, False):
         ind = [0, 3, 5, 7]
-    elif (palnum, high)==(1, True):
+    elif (palnum, high) == (1, True):
         ind = [0, 11, 13, 15]
     else:
         # use 1, False as default (should give a warning)

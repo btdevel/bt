@@ -1,14 +1,14 @@
 from bt.game.city import CityUI, make_city_map
 from bt.game.buildings import guild
 from bt.game.ui import UI
+from bt.game.app import app
 
-res_path = '../res/image/bt1'
-bt_path = '../res/msdos/bt1'
+app.read_config(["bt1-game.conf"])
 
 class State:
     def __init__(self):
-        self.ui = UI(res_path)
-        self.city_handler = CityUI(make_city_map(bt_path))
+        self.ui = UI(app.config["path"]["images"])
+        self.city_handler = CityUI(make_city_map(app.config["path"]["msdos"]))
         self.curr_handler = guild
 
     def run(self):
