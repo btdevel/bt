@@ -56,7 +56,8 @@ class UI(EventHandler):
         s.blit(im, (33, 30))
 
     def update_display(self):
-        pygame.display.flip()
+        pygame.display.update(pygame.Rect(33, 30, 224, 92 + 84))
+        pass
 
     def event_loop(self, state):
         self.state = state
@@ -88,14 +89,14 @@ class UI(EventHandler):
         self.cleanup()
 
 
-    def clear_message(self):
-        self.message_pane.clear()
-
     def clear_view(self):
         s = pygame.display.get_surface()
         pygame.draw.rect(s, pygame.Color(0, 0, 119),
                             pygame.Rect(33, 30, 224, 92 + 84))
         # no update        
 
-    def message(self, msg):
-        self.message_pane.message(msg)
+    def clear_message(self, update=True):
+        self.message_pane.clear(update)
+
+    def message(self, msg, update=True):
+        self.message_pane.message(msg, update)

@@ -52,14 +52,32 @@ class MessagePane():
         self.font = pygame.font.Font(fontfilename, self.fontsize)
         self.foo = 1
 
-    def clear(self):
+        self.update_flag=True
+
+    def clear(self, update=True):
         print "clearing", self.foo
         self.foo += 1
         s = pygame.display.get_surface()
         pygame.draw.rect(s, self.bgcolor, self.rect)
         self.pos = self.rect.topleft
+        self.update(update)
 
+    def update(self, update=True):
+        if update and self.update_flag:
+            print "... updating"
+            pygame.display.update(self.rect)
 
+    def noupdate(self):
+        class UpdateCtx(object):
+            def __init__(self, mp): 
+                self.mp=mp
+            def __enter__(self): 
+                self.old_flag = self.mp.update_flag
+                self.mp.update_flag = False
+            def __exit__(self, *args): 
+                self.mp.update_flag = self.old_flag
+                self.mp.update(True)
+        return UpdateCtx(self)
 
     def _scroll_up(self, surf, y, dy, ds):
         sub = surf.subsurface(self.rect)
@@ -84,7 +102,7 @@ class MessagePane():
         self.font = pygame.font.Font(fontfilename, self.fontsize)
         return self.font
 
-    def message(self, msg):
+    def message(self, msg, update=True):
         surf = pygame.display.get_surface()
         font = self._get_font()
 
@@ -96,19 +114,21 @@ class MessagePane():
                 im = font.render(line, 1, self.fgcolor)
 
                 dy = font.size(line)[1] + self.linesep
-                if y + dy > self.rect.bottom:
+                scroll = y + dy > self.rect.bottom
+                if scroll:
                     ds = (y + dy) - self.rect.bottom
-                    if self.smooth:
+                    if self.smooth and update:
                         for i in xrange(ds):
                             y, dy = self._scroll_up(surf, y, dy, 1)
                             pygame.time.delay(self.delay)
-                            pygame.display.update(self.rect)
+                            self.update(update)
                     else:
                         y, dy = self._scroll_up(surf, y, dy, ds)
                         pygame.time.delay(ds * self.delay)
-                        pygame.display.update(self.rect)
+                        self.update(update)
                 surf.blit(im, (x, y))
-                pygame.display.update(self.rect)
+                self.update(update and scroll)
                 y += dy
         self.pos = x, y
-        pygame.display.flip()
+        self.update(update)
+        

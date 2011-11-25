@@ -136,14 +136,15 @@ class CityUI(EventHandler):
 
 
     def forward(self, state):
-        cell = self.map[self.pos + self.dir.forward_vec]
-        if not cell.is_building():
-            self.pos = self.pos + self.dir.forward_vec
-            self.redraw(state)
+        with state.ui.message_pane.noupdate():
+            cell = self.map[self.pos + self.dir.forward_vec]
+            state.ui.clear_message()
+        
+            if not cell.is_building():
+                self.pos = self.pos + self.dir.forward_vec
+                self.redraw(state)
+                self.print_location(state)
         cell.action(state)
-        state.ui.clear_message()
-#        else:
-#            state.set_current(cell.action, redraw=True)
 
     def reverse(self, state):
         self.dir.reverse()
@@ -161,9 +162,13 @@ class CityUI(EventHandler):
         state.ui.clear_message()
 
     def print_location(self, state):
-        state.ui.clear_message()
-        state.ui.message("You are on %s facing %s." % (self.map[self.pos], str(self.dir)))
-        state.ui.message(str(self.pos))
+        print 1
+        state.ui.clear_message(update=False)
+        print 2
+        state.ui.message("You are on %s facing %s." % (self.map[self.pos].name, str(self.dir)), update=False)
+        print 3
+        state.ui.message("\n\nYou are on: %dE, %dN" % tuple(self.pos))
+        print 4
 
 
 class Array2d(object):

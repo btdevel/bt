@@ -16,9 +16,10 @@ class DefaultBuildingHandler(EventHandler):
         state.ui.blitim(self.filename)
         state.ui.update_display()
         # this should go into some "enter" method
-        state.ui.clear_message()
-        state.ui.message(self.message)
+        state.ui.clear_message(update=False)
+        state.ui.message(self.message, update=False)
         state.ui.message("     (EXIT)")
+        print "building message printed"
 
 class EmptyBuildingHandler(DefaultBuildingHandler):
     def __init__(self, filename, message):
@@ -231,11 +232,11 @@ Who needeth spell points restored?""")
 # has some definite spell point problems. It will cost 
 #Roscoe re-energizes him.
 
-harkyn = DefaultBuildingHandler("inside/castle.png", """This is the entry chamber to Harkyn's Castle. 
-It is not guarded, but a sign threatens trespassers with death. 
-You can:
+harkyn = DefaultBuildingHandler("inside/castle.png", """This is the entry chamber to Harkyn's Castle. It is not guarded, but a sign threatens trespassers with death. You can:
 
-Take stairs up"""
+Take stairs up
+
+"""
 )
 #Castle
 
