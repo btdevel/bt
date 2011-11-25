@@ -50,3 +50,7 @@ def turn_back():
         state.set_handler(state.city_handler, redraw=True)
     return execute
 
+def change_screen(name):
+    def execute(state):
+        state.curr_handler.set_screen(state, name)
+    return execute
