@@ -2,29 +2,7 @@ import pygame
 from bt.game.ui import EventHandler
 import bt.game.action as action
 
-class ImageDisplayHandler(EventHandler):
-    def __init__(self, filename):
-        EventHandler.__init__(self)
-        self.filename = filename
-    def redraw(self, state):
-        state.ui.clear_view()
-        state.ui.blitim(self.filename)
-        state.ui.update_display()
-
-class DefaultBuildingHandler(ImageDisplayHandler):
-    def __init__(self, filename, message, exit_action=action.exit_building()):
-        ImageDisplayHandler.__init__(self, filename)
-        self.add_key_event((pygame.K_ESCAPE, 0), exit_action)
-        self.add_key_event("eE", exit_action)
-        self.message = message
-
-    def redraw(self, state):
-        # this should go into some "enter" method
-        ImageDisplayHandler.redraw(self, state)
-        state.ui.clear_message(update=False)
-        state.ui.message(self.message, update=False)
-        state.ui.message("     (EXIT)")
-        print "building message printed"
+from bt.game.handler import DefaultBuildingHandler, ImageDisplayHandler
 
 class EmptyBuildingHandler(DefaultBuildingHandler):
     def __init__(self, filename, message):
@@ -347,30 +325,6 @@ Take stairs""")
 #The Tower
 
 
-credits = DefaultBuildingHandler("inside/credits.png", """\n\n\n\n\n\n\n\n\nTHE BARD'S TALE IBM was from an original design by Michael Cranford.
-
-It was created at Interplay Productions, in Newport Beach, California.
-
-Interplay wishes to express its gratitude to a number of people who worked on THE BARD'S TALE:
-
-Todd Camasta
-(Artwork)
-
-Troy P. Worrell
-(Programming)
-
-Dave Warhol
-Aarn Abbey
-(Music)
-
-Brian Fargo
-(Dungeons)
-
-Joe Ybarra
-(Producer)
-""")
-
-
 class TurnBackHandler(DefaultBuildingHandler):
     def __init__(self, filename, message, display=""):
         DefaultBuildingHandler.__init__(self, filename, message, exit_action=action.turn_back())
@@ -407,4 +361,6 @@ iron_gate_kylearan = IronGateHandler("city/gate.png", "You stand before an iron 
 
 city_gate = TurnBackHandler("city/city_gate.png", "You stand before the city gates, which are blocked by a gigantic snow drift.", display="")
 
+
+from bt.game.bt1.credits import credits
 

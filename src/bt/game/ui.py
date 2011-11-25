@@ -2,22 +2,7 @@ import pygame
 import os
 
 import bt.game.messages as messages
-
-class EventHandler(object):
-    def __init__(self):
-        self.keymap = {}
-    def add_key_event(self, key, action):
-        if isinstance(key, str):
-            for c in key:
-                self.keymap[c] = action
-        else:
-            self.keymap[key] = action
-    def key_event(self, state, key):
-        if key in self.keymap:
-            self.keymap[key](state)
-            return True
-        return False
-
+from bt.game.handler import EventHandler
 
 
 class UI(EventHandler):

@@ -7,8 +7,8 @@ app.read_config(["bt1-game.conf"])
 
 class State:
     def __init__(self):
-        self.ui = UI(app.config["path"]["images"])
-        self.city_handler = CityUI(make_city_map(app.config["path"]["msdos"]))
+        self.ui = UI(app.config.image_path())
+        self.city_handler = CityUI(make_city_map(app.config.msdos_path()))
         self.curr_handler = guild
 
     def run(self):
@@ -21,5 +21,8 @@ class State:
 
     def redraw(self):
         self.ui.redraw()
+
+    def message_view_ctx(self):
+        return self.ui.message_pane.noupdate()
 
 State().run()
