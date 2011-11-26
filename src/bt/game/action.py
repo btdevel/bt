@@ -64,3 +64,8 @@ def do_nothing():
     def execute(state):
         pass
     return execute
+
+def add_member(filename):
+    def execute(state):
+        state.party.add(filename)
+    return execute

@@ -27,6 +27,22 @@ screen.add_option('No', 'nN', action.change_screen("main"))
 guild.add_screen("leave_game", screen)
 
 
+from bt.game.bt1.char import get_char_list
+
+screen = Screen()
+screen.add_message("Who?\n ")
+for i, char in enumerate(get_char_list()):
+    if char.is_party:
+        line = "*"
+    else:
+        line = "  "
+    line += char.name
+    screen.add_option(line, "%d" % i, action.add_member(char.filename))
+    if i == 8:
+        break
+screen.add_option('(CANCEL)', 'cC', action.change_screen("main"), pos= -1, center=True)
+guild.add_screen("add_member", screen)
+
 
 def not_implemented():
     return continue_screen("\nNot implemented yet.", target="main")
@@ -37,7 +53,6 @@ def roster_full():
 def what_party():
     return continue_screen("\nWhat party!", target="main")
 
-guild.add_screen("add_member", not_implemented())
 guild.add_screen("remove_member", what_party())
 guild.add_screen("create_member", not_implemented())
 guild.add_screen("delete_member", not_implemented())

@@ -137,5 +137,5 @@ class View():
                 surf.blit(im, (x, y))
                 self.update()
                 y += dy
-        self.pos = x, y
+        self.pos = self.rect.left, y
         self.update()

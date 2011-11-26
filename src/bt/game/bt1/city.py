@@ -1,13 +1,13 @@
 from bt.extract.bt1.data import load_street_names
-from bt.game.city import (CityHandler, Array2d, Street, Building)
+from bt.extract.ext_levels import read_city_name, read_city_path
+
 from bt.game.app import app
+from bt.game.city import (CityHandler, Array2d, Street, Building)
+import bt.game.buildings as bld
+import bt.game.action as action
+
 
 def make_city_map(btpath):
-    import bt.game.buildings as bld
-    import bt.game.action as action
-
-    from bt.extract.ext_levels import read_city_name, read_city_path
-
     patmap = Array2d(30, 30, read_city_path(btpath))
     nammap = Array2d(30, 30, read_city_name(btpath))
     streets = load_street_names(btpath)

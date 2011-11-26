@@ -102,40 +102,7 @@ class Party(object):
 
 
 
-fields_msdos = [("name", ">14s  2x"),
-                ("char_party", "B"),
-                ("status", "B"),
-                ("race", "xB"),
-                ("char_class", "xB"),
-                ("curr_str", "xB"),
-                ("curr_int", "xB"),
-                ("curr_dex", "xB"),
-                ("curr_con", "xB"),
-                ("curr_lck", "xB"),
-                ("max_str", "xB"),
-                ("max_int", "xB"),
-                ("max_dex", "xB"),
-                ("max_con", "xB"),
-                ("max_lck", "xB3x"),
-                ("max_hp", "H"),
-                ("curr_hp", "H"),
-                ("max_sp", "H"),
-                ("curr_sp", "H"),
-                ("equipment", "16s"),
-                ("experience", "L"),
-                ("gold", "L"),
-                ("level", "H"),
-                ("con_level", "3xB"),
-                ("mag_level", "B"),
-                ("sor_level", "B"),
-                ("wiz_level", "B7x"),
-                ("num_songs", "B15x")
-                ]
-
-
-
-
-chardisp = list("inside/empty.png",
+chardisp = ["inside/empty.png",
                              """N %(char_name)s
 Race: %(char_race)s
 Class: %(char_class)s
@@ -147,4 +114,4 @@ Exper: %(char_exp)d
 Gold:  %(char_gold)d
     (POOL GOLD)
     (TRADE GOLD)
-    (CONTINUE)""")
+    (CONTINUE)"""]

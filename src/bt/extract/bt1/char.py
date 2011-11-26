@@ -52,3 +52,16 @@ def load_msdos_character(id, path):
 
     fill_fields_from_buffer(char, fields_msdos, ba)
     return char
+
+def load_base_info(filename):
+    ba = btfile.load_file(filename)
+    fields = fields_msdos[:2]
+    char = btchar.Character(id)
+    fill_fields_from_buffer(char, fields, ba)
+    class BaseChar():
+        pass
+    char_info = BaseChar()
+    char_info.name = char.name
+    char_info.is_party = char.char_party == 2
+    char_info.filename = filename
+    return char_info
