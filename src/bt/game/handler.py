@@ -2,8 +2,10 @@ import pygame
 import bt.game.action as action
 
 class EventHandler(object):
-    def __init__(self):
+    def __init__(self, location=""):
         self.keymap = {}
+        self.location = location
+
     def add_key_event(self, key, action):
         if isinstance(key, str):
             for c in key:
@@ -17,17 +19,20 @@ class EventHandler(object):
         return False
 
 class ImageDisplayHandler(EventHandler):
-    def __init__(self, filename):
-        EventHandler.__init__(self)
+    def __init__(self, filename, location=""):
+        EventHandler.__init__(self, location=location)
         self.filename = filename
     def redraw(self, state):
         state.ui.clear_view()
-        state.ui.blitim(self.filename)
-        state.ui.update_display()
+        if self.filename:
+            state.ui.blit_image(self.filename)
+        else:
+            state.city_handler.redraw(state)
+
 
 class DefaultBuildingHandler(ImageDisplayHandler):
-    def __init__(self, filename, message, exit_action=action.exit_building()):
-        ImageDisplayHandler.__init__(self, filename)
+    def __init__(self, filename, message, exit_action=action.exit_building(), location=""):
+        ImageDisplayHandler.__init__(self, filename, location=location)
         self.add_key_event((pygame.K_ESCAPE, 0), exit_action)
         self.add_key_event("eE", exit_action)
         self.message = message
@@ -38,12 +43,12 @@ class DefaultBuildingHandler(ImageDisplayHandler):
         with state.message_view_ctx() as msg:
             msg.clear()
             msg.message(self.message)
-            msg.message("     (EXIT)")
+            msg.message("(EXIT)", pos= -1, center=True)
         print "building message printed"
 
 class MultiScreenHandler(ImageDisplayHandler):
-    def __init__(self, filename):
-        ImageDisplayHandler.__init__(self, filename)
+    def __init__(self, filename, location=""):
+        ImageDisplayHandler.__init__(self, filename, location=location)
         self.screens = {}
         self.current = None
 
@@ -53,33 +58,45 @@ class MultiScreenHandler(ImageDisplayHandler):
         self.screens[name] = screen
         screen.set_parent(self)
     def set_screen(self, state, name):
-        state.ui.message_pane.clear()
+        state.ui.message_view.clear()
         self.current = self.screens[name]
         self.current.redraw(state)
     def key_event(self, state, key):
         return self.current.key_event(state, key)
     def redraw(self, state):
         ImageDisplayHandler.redraw(self, state)
-        state.ui.message_pane.clear()
+        state.ui.message_view.clear()
         self.current.redraw(state)
 
 
 class Screen(EventHandler):
     def __init__(self):
         EventHandler.__init__(self)
-        self.msg = ""
+        self.messages = []
         self.parent = None
+
     def set_parent(self, parent):
         assert self.parent is None
         self.parent = parent
 
-    def add_message(self, text):
-        if self.msg == "":
-            self.msg = text
-        else:
-            self.msg += "\n" + text
-    def add_option(self, text, keys, action):
-        self.add_message(text)
+    def add_message(self, text, pos=None, center=False):
+        self.messages.append((text, pos, center))
+
+    def add_option(self, text, keys, action, pos=None, center=False):
+        self.add_message(text, pos=pos, center=center)
         self.add_key_event(keys, action)
+
     def redraw(self, state):
-        state.ui.message_pane.message(self.msg)
+        with state.ui.message_view.noupdate() as view:
+            for text, pos, center in self.messages:
+                view.message(text, pos=pos, center=center)
+
+def continue_screen(msg, action=None, target=None):
+    import bt.game.action as btaction
+    if action is None:
+        action = btaction.change_screen(target)
+
+    screen = Screen()
+    screen.add_message(msg)
+    screen.add_option('          (CONTINUE)', 'cC', action, pos= -1)
+    return screen

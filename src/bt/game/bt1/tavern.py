@@ -2,39 +2,44 @@ import pygame
 import bt.game.action as action
 from bt.game.handler import MultiScreenHandler, Screen
 
-pub = MultiScreenHandler("inside/pub.png")
+class TavernHandler(MultiScreenHandler):
+    pass
 
-pub_greeting_screen = Screen()
-pub_greeting_screen.add_message("Hail, travelers! Step to the bar and I'll draw you a tankard.")
-pub_greeting_screen.add_message("\nYou can:")
-pub_greeting_screen.add_option('Order a drink', 'oO', action.change_screen("order"))
-pub_greeting_screen.add_option('Talk to barkeep', 'tT', action.change_screen("talk"))
-pub_greeting_screen.add_message("\n\n\n")
-pub_greeting_screen.add_option('      (EXIT)', 'eE', action.exit_building())
+tavern = TavernHandler("inside/pub.png", location="Tavern")
+pub = tavern
 
-pub_order_screen = Screen()
-pub_order_screen.add_message("Seat thyself, %{charname}. We've got...")
-pub_order_screen.add_option("Beer", "bB", action.message("Not bad!!"))
-pub_order_screen.add_option("Mead", "mM", action.message("Not bad!!"))
-pub_order_screen.add_option("Foul spirits", "fF", action.message("You don't feel too well."))
-pub_order_screen.add_option("Ginger Ale", "gG", action.message("The girls in the tavern are not impressed."))
-pub_order_screen.add_option("Wine", "wW", action.message("The barkeep says, \"Go down to the cellar and pick out a bottle.\""))
-pub_order_screen.add_message("\nWhat'll it be?")
-pub_order_screen.add_option('      (CANCEL)', 'cC', action.change_screen("greeting"))
+tavern_greeting_screen = Screen()
+tavern_greeting_screen.add_message("Hail, travelers! Step to the bar and I'll draw you a tankard.")
+tavern_greeting_screen.add_message("\nYou can:\n")
+tavern_greeting_screen.add_option('Order a drink', 'oO', action.change_screen("order"))
+tavern_greeting_screen.add_option('Talk to barkeep', 'tT', action.change_screen("talk"))
+tavern_greeting_screen.add_message("\n\n\n")
+tavern_greeting_screen.add_option('(EXIT)', 'eE', action.exit_building(), pos= -1, center=True)
 
-pub_talk_screen = Screen()
-pub_talk_screen.add_message("\"Talk ain't cheap,\" the barkeep says.")
-pub_talk_screen.add_message("\nHow much will you tip him?\n\n\n")
-pub_talk_screen.add_option('      (CANCEL)', 'cC', action.change_screen("greeting"))
+tavern_order_screen = Screen()
+tavern_order_screen.add_message("Seat thyself, %(charname)s. We've got...\n")
+tavern_order_screen.add_option("Ale", "aA", action.message("Not bad!!"))
+tavern_order_screen.add_option("Beer", "bB", action.message("Not bad!!"))
+tavern_order_screen.add_option("Mead", "mM", action.message("Not bad!!"))
+tavern_order_screen.add_option("Foul spirits", "fF", action.message("You don't feel too well."))
+tavern_order_screen.add_option("Ginger Ale", "gG", action.message("The girls in the tavern are not impressed."))
+tavern_order_screen.add_option("Wine", "wW", action.message("The barkeep says, \"Go down to the cellar and pick out a bottle.\""))
+tavern_order_screen.add_message("\n\nWhat'll it be?")
+tavern_order_screen.add_option('(CANCEL)', 'cC', action.change_screen("greeting"), pos= -1, center=True)
+
+tavern_talk_screen = Screen()
+tavern_talk_screen.add_message("\"Talk ain't cheap,\" the barkeep says.")
+tavern_talk_screen.add_message("\nHow much will you tip him?\n\n\n")
+tavern_talk_screen.add_option('(CANCEL)', 'cC', action.change_screen("greeting"), pos= -1, center=True)
 
 
 
 
-pub.add_screen("greeting", pub_greeting_screen)
-#pub.add_screen("whodrinks", pub_who_drinks_screen)
-pub.add_screen("order", pub_order_screen)
-pub.add_screen("talk", pub_talk_screen)
-#pub.add_screen("tip", pub_tip_screen)
+tavern.add_screen("greeting", tavern_greeting_screen)
+#tavern.add_screen("whodrinks", tavern_who_drinks_screen)
+tavern.add_screen("order", tavern_order_screen)
+tavern.add_screen("talk", tavern_talk_screen)
+#tavern.add_screen("tip", tavern_tip_screen)
 
 
 #'Who will drink?

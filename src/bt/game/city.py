@@ -1,33 +1,27 @@
 import os
 import pygame
 
-from bt.extract.bt1.data import load_street_names
 from bt.game.movement import Direction, Vector
 from bt.game.ui import EventHandler
+from bt.game.app import app
 
-class ActionContainer(object):
+class Cell(object):
     def __init__(self, action=None):
-        if action is None:
-            action = self.do_nothing
         self.action = action
-    def do_nothing(self, state):
-        pass
-    def not_implemented(self, state):
-        state.ui.message("This feature is not yet implemented.")
 
 
-class Street(ActionContainer):
+class Street(Cell):
     def __init__(self, name="", action=None):
-        ActionContainer.__init__(self, action)
+        Cell.__init__(self, action)
         self.name = name
     def __str__(self):
         return "Street(%s)" % self.name
     def is_building(self):
         return False
 
-class Building(ActionContainer):
+class Building(Cell):
     def __init__(self, type, entry_handler, front=None):
-        ActionContainer.__init__(self, self.enter_building)
+        Cell.__init__(self, self.enter_building)
         self.type = type
         self.front = front
         self.entry_handler = entry_handler
@@ -59,12 +53,14 @@ class CityMap(object):
 
 
 
-class CityUI(EventHandler):
-    def __init__(self, map):
-        EventHandler.__init__(self)
+class CityHandler(EventHandler):
+    def __init__(self, map, location=""):
+        EventHandler.__init__(self, location=location)
         self.map = map
-        self.pos = Vector([25, 15])
+        self.pos = Vector([0, 0])
         self.dir = Direction()
+
+        self.show_pos = app.config.debug.show_pos(default=False, type=bool)
 
         self.add_key_event((pygame.K_UP, 0), self.forward)
         self.add_key_event((pygame.K_DOWN, 0), self.reverse)
@@ -90,18 +86,18 @@ class CityUI(EventHandler):
         else:
             base = 'FLR'[left] + str(forw - (left == 0))
             filename = os.path.join(cell.type, base + '.png')
-        state.ui.blitim(filename)
+        state.ui.blit_image(filename)
 
     def redraw(self, state):
-        s = pygame.display.get_surface()
+        surf = state.ui.world_view.get_surf()
         if self.isbuildingat(1):
-            pygame.draw.rect(s, pygame.Color(0, 0, 119),
-                              pygame.Rect(33, 30, 224, 92 + 84))
+            pygame.draw.rect(surf, pygame.Color(0, 0, 119),
+                              pygame.Rect(0, 0, 224, 92 + 84))
         else:
-            pygame.draw.rect(s, pygame.Color(0, 0, 119),
-                              pygame.Rect(33, 30, 224, 92))
-            pygame.draw.rect(s, pygame.Color(204, 119, 85),
-                              pygame.Rect(33, 30 + 92, 224, 84))
+            pygame.draw.rect(surf, pygame.Color(0, 0, 119),
+                              pygame.Rect(0, 0, 224, 92))
+            pygame.draw.rect(surf, pygame.Color(204, 119, 85),
+                              pygame.Rect(0, 0 + 92, 224, 84))
 
         # naming for building images with location relative to xx  
         #    F2
@@ -136,15 +132,17 @@ class CityUI(EventHandler):
 
 
     def forward(self, state):
-        with state.ui.message_pane.noupdate():
+        with state.ui.message_view.noupdate():
             cell = self.map[self.pos + self.dir.forward_vec]
             state.ui.clear_message()
-        
+
             if not cell.is_building():
                 self.pos = self.pos + self.dir.forward_vec
                 self.redraw(state)
-                self.print_location(state)
-        cell.action(state)
+                if self.show_pos:
+                    self.print_location(state)
+        if cell.action:
+            cell.action(state)
 
     def reverse(self, state):
         self.dir.reverse()
@@ -162,13 +160,10 @@ class CityUI(EventHandler):
         state.ui.clear_message()
 
     def print_location(self, state):
-        print 1
-        state.ui.clear_message(update=False)
-        print 2
-        state.ui.message("You are on %s facing %s." % (self.map[self.pos].name, str(self.dir)), update=False)
-        print 3
-        state.ui.message("\n\nYou are on: %dE, %dN" % tuple(self.pos))
-        print 4
+        with state.ui.message_view.noupdate() as msg:
+            msg.clear()
+            msg.message("You are on %s facing %s." % (self.map[self.pos].name, str(self.dir)))
+            msg.message("\n\nYou are on: %dE, %dN" % tuple(self.pos))
 
 
 class Array2d(object):
@@ -197,83 +192,4 @@ class Array2d(object):
         cell.action = action
         self[pt] = cell
 
-
-def make_city_map_new(btpath):
-    import bt.game.buildings as bld
-    import bt.game.action as action
-
-    from bt.extract.ext_levels import read_city_name, read_city_path
-
-    patmap = Array2d(30, 30, read_city_path(btpath))
-    nammap = Array2d(30, 30, read_city_name(btpath))
-    streets = load_street_names(btpath)
-    cmap = Array2d(30, 30)
-
-    for i in xrange(30):
-        for j in xrange(30):
-            type = patmap[(i, j)] & 7
-            special = patmap[(i, j)] >> 3
-            nameind = nammap[(i, j)]
-
-            if type == 0:
-                curr = Street(streets[nameind])
-                if special == 12:
-                    curr.action = action.enter(bld.statue)
-                elif special == 13:
-                    if j < 15:
-                        curr.action = action.enter(bld.iron_gate_mangar)
-                    else:
-                        curr.action = action.enter(bld.iron_gate_kylearan)
-                elif special == 15:
-                    curr.action = action.message("Entrance to sewers here")
-                elif special == 21:
-                    curr.action = action.enter(bld.city_gate)
-                elif special == 0:
-                    pass
-                else:
-                    print "Unknown street special:" + str(special)
-            else:
-                curr = Building('house' + str(type), None)
-                if special == 0: # normal house
-                    curr.entry_handler = bld.empty
-                elif special == 1: # Adventurer's Guild
-                    curr.entry_handler = bld.guild
-                    curr.front = 'city/guild.png'
-                elif special == 2: # Pub/Inn
-                    curr.entry_handler = bld.pub
-                    curr.front = 'city/pub.png'
-                elif special == 3: # Garth's Shop
-                    curr.entry_handler = bld.shop
-                    curr.front = 'city/shop.png'
-                elif special == 4: # Temple
-                    curr.entry_handler = bld.temple
-                    curr.front = 'city/temple.png'
-                elif special == 5: # "R", # Review Board
-                    curr.entry_handler = bld.review
-                elif special == 14: # Catacombs/Mad God Temple
-                    curr.entry_handler = bld.madgod
-                    curr.front = 'city/temple.png'
-                elif special == 16: # Interplay Credits
-                    curr.entry_handler = bld.credits
-                elif special == 17: # Roscoe's Energy Emporium
-                    curr.entry_handler = bld.roscoes
-                elif special == 18: # Kylearan's Tower
-                    curr.entry_handler = bld.kylearan
-                elif special == 19: # Harkyn's Castle *get front
-                    curr.entry_handler = bld.harkyn
-                    curr.front = 'city/castle.png'
-                elif special == 20: # Mangar's Tower
-                    curr.entry_handler = bld.mangar
-                else:
-                    print "Unknown building special:" + str(special)
-            cmap[(i, j)] = curr
-
-#    cmap.set_action([25, 18], action.message("Garth shop is to the right"))
-#    cmap.set_action([25, 16], action.one_time_only(action.message("The shoppe is ahead")))
-    cmap.set_action([25, 2], action.teleport([25, 7]))
-    cmap[4, 16].entry_handler = bld.stable
-    cmap[4, 15].entry_handler = bld.stable
-    return cmap
-
-make_city_map = make_city_map_new
 

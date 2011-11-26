@@ -1,51 +1,52 @@
-import pygame
 import bt.game.action as action
-from bt.game.handler import ImageDisplayHandler, DefaultBuildingHandler
+from bt.game.handler import MultiScreenHandler, Screen, continue_screen
+from bt.game.movement import Direction
 
-class GuildHandler(DefaultBuildingHandler):
-    def __init__(self, filename, message):
-        from bt.game.movement import Direction
-        DefaultBuildingHandler.__init__(self, filename, message)
-        self.add_key_event("aA", self.add_member)
-        self.add_key_event("rR", self.remove_member)
-        self.add_key_event("cC", self.create_member)
-        self.add_key_event("dD", self.delete_member)
-        self.add_key_event("sS", self.save_party)
-        self.add_key_event("lL", self.leave_game)
-        self.add_key_event("eE", action.enter_city(pos=[25, 15], newdir=Direction.NORTH))
+class GuildHandler(MultiScreenHandler):
+    pass
 
-    def add_member(self, state):
-        state.ui.message("Not implemented yet.")
+guild = GuildHandler("inside/guild.png", location="The guild")
 
-    def remove_member(self, state):
-        state.ui.message("Not implemented yet.")
+screen = Screen()
+screen.add_message("Thou art in the Guild of Adventurers.\n ")
+screen.add_option('Add member', 'aA', action.change_screen("add_member"))
+screen.add_option('Remove member', 'rR', action.change_screen("remove_member"))
+screen.add_option('Create a member', 'cC', action.change_screen("create_member"))
+screen.add_option('Delete a member', 'dD', action.change_screen("delete_member"))
+screen.add_option('Save party', 'sS', action.change_screen("save_party"))
+screen.add_option('Leave game', 'lL', action.change_screen("leave_game"))
+screen.add_option('Enter the city', 'eE',
+#                  action.enter_city(pos=[2, 3], newdir=Direction.NORTH))
+                  action.enter_city(pos=[25, 15], newdir=Direction.NORTH))
+guild.add_screen("main", screen)
 
-    def create_member(self, state):
-        state.ui.message("Not implemented yet.")
-
-    def delete_member(self, state):
-        state.ui.message("Not implemented yet.")
-
-    def save_party(self, state):
-        state.ui.message("Not implemented yet.")
-
-    def leave_game(self, state):
-        state.running = False
+screen = Screen()
+screen.add_message("Leave game?\n ")
+screen.add_option('Yes', 'yY', action.leave_game())
+screen.add_option('No', 'nN', action.change_screen("main"))
+guild.add_screen("leave_game", screen)
 
 
 
-guild = GuildHandler("inside/guild.png", """Thou art in the Guild of Adventurers.
+def not_implemented():
+    return continue_screen("\nNot implemented yet.", target="main")
 
-Add member
-Remove member
-Create a member
-Delete a member
-Save party
-Leave game
-Enter the city
-""")
-#Sorry, the roster is full.
-#What party!
+def roster_full():
+    return continue_screen("\nSorry, the roster is full.", target="main")
+
+def what_party():
+    return continue_screen("\nWhat party!", target="main")
+
+guild.add_screen("add_member", not_implemented())
+guild.add_screen("remove_member", what_party())
+guild.add_screen("create_member", not_implemented())
+guild.add_screen("delete_member", not_implemented())
+guild.add_screen("save_party", what_party())
+
+
+
+#
+#
 #Name to save party under?
 #That name is already in use.
 #Do you still want to use it?

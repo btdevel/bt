@@ -54,3 +54,13 @@ def change_screen(name):
     def execute(state):
         state.curr_handler.set_screen(state, name)
     return execute
+
+def leave_game():
+    def execute(state):
+        state.running = False
+    return execute
+
+def do_nothing():
+    def execute(state):
+        pass
+    return execute

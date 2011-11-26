@@ -1,4 +1,4 @@
-from bt.game.city import CityUI, make_city_map
+from bt.game.bt1.city import get_city_handler
 from bt.game.buildings import guild
 from bt.game.ui import UI
 from bt.game.app import app
@@ -7,22 +7,24 @@ app.read_config(["bt1-game.conf"])
 
 class State:
     def __init__(self):
-        self.ui = UI(app.config.image_path())
-        self.city_handler = CityUI(make_city_map(app.config.msdos_path()))
-        self.curr_handler = guild
+        self.ui = UI()
+        self.city_handler = get_city_handler()
+        self.curr_handler = None
 
     def run(self):
-        self.ui.init()
-        self.ui.event_loop(self)
+        self.ui.init(self)
+        self.set_handler(guild, True)
+        self.ui.event_loop()
 
     def set_handler(self, curr, redraw=True):
         self.curr_handler = curr
+        self.ui.show_location(curr.location)
         self.ui.redraw()
 
     def redraw(self):
         self.ui.redraw()
 
     def message_view_ctx(self):
-        return self.ui.message_pane.noupdate()
+        return self.ui.message_view.noupdate()
 
 State().run()

@@ -1,14 +1,28 @@
-import pygame
 import bt.game.action as action
-from bt.game.handler import ImageDisplayHandler, DefaultBuildingHandler
+from bt.game.handler import MultiScreenHandler, Screen, continue_screen
+from bt.game.movement import Direction
 
-review = DefaultBuildingHandler("inside/review.png", """Wouldst thou like to be reviewed for:
+class ReviewHandler(MultiScreenHandler):
+    pass
 
-Advancement
-Spell Acquiring
-Class Change
-""")
-#Review board
+review = ReviewHandler("inside/review.png", location="Review board")
+
+screen = Screen()
+screen.add_message("Wouldst thou like to be reviewed for:\n ")
+screen.add_option('Advancement', 'aA', action.change_screen("advancement"))
+screen.add_option('Spell Acquiring', 'sS', action.change_screen("spell_acquiring"))
+screen.add_option('Class Change', 'cC', action.change_screen("class_change"))
+screen.add_option('(EXIT)', 'eE', action.turn_back(), pos= -1, center=True)
+review.add_screen("main", screen)
+
+def not_implemented():
+    return continue_screen("\nNot implemented yet.", target="main")
+
+review.add_screen("advancement", not_implemented())
+review.add_screen("spell_acquiring", not_implemented())
+review.add_screen("class_change", not_implemented())
+
+
 #The review Board is closed for the evening. The guild 
 #leaders will meet with you in the morning.
 #

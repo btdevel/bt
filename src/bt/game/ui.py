@@ -1,28 +1,40 @@
 import pygame
 import os
 
-import bt.game.messages as messages
+import bt.game.view as view
 from bt.game.handler import EventHandler
+from bt.game.app import app
 
 
 class UI(EventHandler):
-    def __init__(self, resdir):
+    def __init__(self):
         EventHandler.__init__(self)
-        self.resdir = resdir
         self.add_key_event((pygame.K_q, pygame.KMOD_LCTRL), self.request_exit)
-        self.message_pane = messages.MessagePane(pygame.Rect(340, 30, 264, 198))
 
+        self.image_path = app.config.main.image_path()
 
-    def init(self):
+        self.message_view = view.View(pygame.Rect(340, 30, 264, 198), config=app.config.message_view)
+        self.world_view = view.View(pygame.Rect(34, 30, 222, 176), config=app.config.world_view)
+        self.location_view = view.View(pygame.Rect(34, 206, 222, 26), config=app.config.location_view)
+        self.char_view = view.View(pygame.Rect(30, 266, 578, 110), config=app.config.character_view)
+
+    def init(self, state):
+        self.state = state
         pygame.display.init()
         pygame.font.init()
 
         pygame.display.set_mode((640, 400))
         pygame.key.set_repeat(200, 200)
 
-        s = pygame.display.get_surface()
-        main = pygame.image.load(os.path.join(self.resdir, 'main.png'))
-        s.blit(main, (0, 0))
+        surf = pygame.display.get_surface()
+        main = pygame.image.load(os.path.join(self.image_path, 'main.png'))
+        surf.blit(main, (0, 0))
+
+        self.message_view.clear()
+        self.world_view.clear()
+        self.location_view.clear()
+        self.char_view.clear()
+
         pygame.display.flip()
 
     def request_exit(self, state):
@@ -32,20 +44,11 @@ class UI(EventHandler):
         pygame.quit()
 
     def redraw(self):
-        self.message_pane.clear()
+        self.message_view.clear()
         self.state.curr_handler.redraw(self.state)
 
-    def blitim(self, filename):
-        s = pygame.display.get_surface()
-        im = pygame.image.load(os.path.join(self.resdir, filename))
-        s.blit(im, (33, 30))
-
-    def update_display(self):
-        pygame.display.update(pygame.Rect(33, 30, 224, 92 + 84))
-        pass
-
-    def event_loop(self, state):
-        self.state = state
+    def event_loop(self):
+        state = self.state
         state.running = True
         self.redraw()
 
@@ -73,15 +76,22 @@ class UI(EventHandler):
 
         self.cleanup()
 
+    def blit_image(self, filename):
+        self.world_view.blit_image(filename)
+
+    def update_display(self):
+        self.world_view.update()
 
     def clear_view(self):
-        s = pygame.display.get_surface()
-        pygame.draw.rect(s, pygame.Color(0, 0, 119),
-                            pygame.Rect(33, 30, 224, 92 + 84))
-        # no update        
+        self.world_view.clear()
 
-    def clear_message(self, update=True):
-        self.message_pane.clear(update)
+    def clear_message(self):
+        self.message_view.clear()
 
-    def message(self, msg, update=True):
-        self.message_pane.message(msg, update)
+    def message(self, msg):
+        self.message_view.message(msg)
+
+    def show_location(self, location):
+        with self.location_view.noupdate() as view:
+            view.clear()
+            view.message(location, center=True)

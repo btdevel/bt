@@ -4,12 +4,19 @@ _Empty = object()
 
 class Config(object):
     def __init__(self, map={}, value=_Empty):
+        #TODO: map has to be changed to maps and the lookup performed in all maps
         if not isinstance(map, dict):
             print map
             print type(map)
             raise Exception()
         self._map = map
         self._value = value
+
+    def add(self, config):
+        # see comment above
+        self._map = config._map
+        self._value = config._value
+
     def __getattr__(self, name):
         value = self._map.get(name, _Empty)
         if isinstance(value, dict):
@@ -32,8 +39,12 @@ class Config(object):
 
 
 class App(object):
+    def __init__(self):
+        self.config = Config()
+        self.values = {}
+
     def read_config(self, filenames):
-        self.config = self._make_config(filenames[0])
+        self.config.add(self._make_config(filenames[0]))
 
     def _make_config(self, filename):
         try:
