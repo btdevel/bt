@@ -43,6 +43,12 @@ def fill_fields_from_buffer(char, fields, buffer):
         char.__setattr__(attr_name, value[0])
         offset += struct.calcsize(fmt)
 
+def load_msdos_character2(filename):
+    char = btchar.Character()
+    ba = btfile.load_file(filename)
+    fill_fields_from_buffer(char, fields_msdos, ba)
+    return char
+
 def load_msdos_character(id, path):
     if isinstance(id, str):
         raise Exception("Not yet implemented")

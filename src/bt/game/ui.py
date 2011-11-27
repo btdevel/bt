@@ -2,6 +2,7 @@ import pygame
 import os
 
 import bt.game.view as view
+import bt.game.charview as charview
 from bt.game.handler import EventHandler
 from bt.game.app import app
 
@@ -15,8 +16,14 @@ class UI(EventHandler):
 
         self.message_view = view.View(pygame.Rect(340, 30, 264, 198), config=app.config.message_view)
         self.world_view = view.View(pygame.Rect(34, 30, 222, 176), config=app.config.world_view)
-        self.location_view = view.View(pygame.Rect(34, 206, 222, 26), config=app.config.location_view)
-        self.char_view = view.View(pygame.Rect(30, 266, 578, 110), config=app.config.character_view)
+        self.location_view = view.View(pygame.Rect(34, 207, 222, 25), config=app.config.location_view)
+
+        self.use_own_headings = app.config.character_view.use_own_headings(default=True, type=bool)
+        if self.use_own_headings:
+            char_rect = pygame.Rect(30, 242, 578, 110)
+        else:
+            char_rect = pygame.Rect(30, 266, 578, 110)
+        self.char_view = charview.CharacterView(char_rect, config=app.config.character_view)
 
     def init(self, state):
         self.state = state
@@ -46,6 +53,7 @@ class UI(EventHandler):
     def redraw(self):
         self.message_view.clear()
         self.state.curr_handler.redraw(self.state)
+        self.char_view.redraw(self.state)
 
     def event_loop(self):
         state = self.state
@@ -94,4 +102,4 @@ class UI(EventHandler):
     def show_location(self, location):
         with self.location_view.noupdate() as view:
             view.clear()
-            view.message(location, center=True)
+            view.print_centered(location)

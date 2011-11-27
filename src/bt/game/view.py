@@ -55,7 +55,6 @@ class View():
 
 
     def clear(self):
-        print "clearing"
         surf = self.get_surf()
         pygame.draw.rect(surf, self.bgcolor, self.rect)
         self.pos = self.rect.topleft
@@ -99,6 +98,50 @@ class View():
         pygame.draw.rect(surf, self.bgcolor, rect)
         return y, dy
 
+    def _interpolate_string(self, text):
+        try:
+            text = text % app.values
+        except ValueError:
+            print "ValueError in " + text
+        return text
+
+    def print_centered(self, text):
+        surf = self.get_surf()
+        font = self.get_font()
+        text = self._interpolate_string(text)
+        im = font.render(text, 1, self.fgcolor)
+        x = self.rect.left + (self.rect.width - im.get_width()) // 2
+        y = self.rect.top + (self.rect.height - im.get_height()) // 2
+        surf.blit(im, (x, y))
+        self.update()
+
+    def print_tabbed(self, texts, tabs):
+        surf = self.get_surf()
+        font = self.get_font()
+        x, y = self.pos
+
+        if isinstance(texts, str):
+            texts = texts.split("\t")
+
+        for i, text in  enumerate(texts):
+            text = self._interpolate_string(text)
+            im = font.render(text, 1, self.fgcolor)
+            if i < len(tabs):
+                x, mode = tabs[i]
+            else:
+                print "Not enough tabs %d/%d" % (len(texts), len(tabs))
+                # reuse last value
+            if mode in 'rR':
+                x -= im.get_width()
+            elif mode in 'cC':
+                x -= im.get_width() // 2
+
+            surf.blit(im, (x, y))
+            x += im.get_width() + im.get_height() // 2
+            self.update()
+        self.pos = self.rect.left, y + im.get_height() + self.linesep
+        self.update()
+
     def message(self, msg, update=True, pos=None, center=False):
         surf = self.get_surf()
         font = self.get_font()
@@ -111,11 +154,7 @@ class View():
         if pos is not None:
             y = self.rect.bottom + pos * (self.fontsize + self.linesep)
 
-        try:
-            msg = msg % app.values
-        except ValueError:
-            print "ValueError in " + msg
-
+        msg = self._interpolate_string(msg)
         for line in split_into_lines(msg, width_ok):
                 im = font.render(line, 1, self.fgcolor)
                 if center:

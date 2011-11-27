@@ -17,7 +17,6 @@ class CreditsHandler(ImageDisplayHandler):
             msg.clear()
             msg.message(self.message)
             msg.message("\n(CONTINUE)", center=True)
-        print "building message printed"
 
 
 credits = CreditsHandler("inside/credits.png", """\n\n\n\n\n\n\n\n\nTHE BARD'S TALE IBM was from an original design by Michael Cranford.

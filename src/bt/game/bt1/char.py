@@ -9,8 +9,8 @@ from bt.game.app import app
 def load_msdos_char_list(btpath):
     pass
 
-def load_msdos_char(btpath):
-    pass
+def load_msdos_char(filename):
+    return charload.load_msdos_character2(filename)
 
 def get_char_list():
     btpath = app.config.msdos_path()

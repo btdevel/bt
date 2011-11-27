@@ -98,7 +98,9 @@ class Character(object):
 
 class Party(object):
     def __init__(self):
-        pass
+        self.chars = []
+    def add(self, char):
+        self.chars.append(char)
 
 
 

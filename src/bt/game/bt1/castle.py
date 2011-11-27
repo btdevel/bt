@@ -5,6 +5,6 @@ harkyn = DefaultBuildingHandler("inside/castle.png", """This is the entry chambe
 
 Take stairs up
 
-"""
+""", location="Castle"
 )
-#Castle
+

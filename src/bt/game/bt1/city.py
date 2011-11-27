@@ -28,7 +28,7 @@ def make_city_map(btpath):
                         curr.action = action.enter(bld.iron_gate_mangar)
                     else:
                         curr.action = action.enter(bld.iron_gate_kylearan)
-                    curr.action = None
+#                    curr.action = None
                 elif special == 15:
                     curr.action = action.enter(bld.sewers_entrance)
                 elif special == 21:

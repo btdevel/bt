@@ -5,7 +5,10 @@ class EventHandler(object):
     def __init__(self, location=""):
         self.keymap = {}
         self.location = location
-
+    def enter(self, state):
+        pass
+    def exit(self, state):
+        pass
     def add_key_event(self, key, action):
         if isinstance(key, str):
             for c in key:
@@ -44,22 +47,34 @@ class DefaultBuildingHandler(ImageDisplayHandler):
             msg.clear()
             msg.message(self.message)
             msg.message("(EXIT)", pos= -1, center=True)
-        print "building message printed"
 
 class MultiScreenHandler(ImageDisplayHandler):
     def __init__(self, filename, location=""):
         ImageDisplayHandler.__init__(self, filename, location=location)
         self.screens = {}
         self.current = None
+        self.start = None
 
     def add_screen(self, name, screen):
-        if self.current is None:
-            self.current = screen
+        if self.start is None:
+            self.start = name
+        assert name not in self.screens
         self.screens[name] = screen
         screen.set_parent(self)
+
+    def enter(self, state):
+        self.set_screen(state, self.start)
+
+    def exit(self, state):
+        if self.current:
+            self.current.exit(state)
+
     def set_screen(self, state, name):
+        if self.current:
+            self.current.exit(state)
         state.ui.message_view.clear()
         self.current = self.screens[name]
+        self.current.enter(state)
         self.current.redraw(state)
     def key_event(self, state, key):
         return self.current.key_event(state, key)
@@ -78,6 +93,10 @@ class Screen(EventHandler):
     def set_parent(self, parent):
         assert self.parent is None
         self.parent = parent
+
+    def clear(self):
+        self.messages = []
+        self.keymap = {}
 
     def add_message(self, text, pos=None, center=False):
         self.messages.append((text, pos, center))
@@ -100,3 +119,4 @@ def continue_screen(msg, action=None, target=None):
     screen.add_message(msg)
     screen.add_option('          (CONTINUE)', 'cC', action, pos= -1)
     return screen
+
