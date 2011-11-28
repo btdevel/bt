@@ -28,10 +28,26 @@ guild.add_screen("leave_game", screen)
 
 
 from bt.game.bt1.char import (get_char_list, load_msdos_char)
+
+def add_member(character):
+    def execute(state):
+        ret = state.party.add(character)
+        print ret, not ret[0]
+        if not ret[0]:
+            action.change_screen(ret[1])(state)
+            return
+        state.ui.char_view.redraw(state)
+        action.change_screen("main")
+    return execute
+
+
 class AddMemberScreen(Screen):
     def enter(self, state):
+        if state.party.is_full():
+            action.change_screen("roster_full")(state)
+            return
+
         self.clear()
-        self.add_message("Who?\n ")
         for i, char in enumerate(get_char_list()):
             if char.is_party:
                 line = "*"
@@ -40,14 +56,13 @@ class AddMemberScreen(Screen):
             line += char.name
             line = str(i) + " " + line
             rchar = load_msdos_char(char.filename)
-            self.add_option(line, "%d" % i, action.add_member(rchar))
-            if i == 8:
+            self.add_option(line, "%d" % i, add_member(rchar))
+            if i == 9:
                 break
-        self.add_option('(CANCEL)', 'cC', action.change_screen("main"), pos= -1, center=True)
+        import pygame
+        self.add_key_event((pygame.K_ESCAPE, 0), action.change_screen("main"))
 
-screen = AddMemberScreen()
-screen.add_option('(CANCEL)', 'cC', action.change_screen("main"), pos= -1, center=True)
-guild.add_screen("add_member", screen)
+guild.add_screen("add_member", AddMemberScreen())
 
 
 
@@ -61,6 +76,14 @@ def roster_full():
 
 def what_party():
     return continue_screen("\nWhat party!", target="main")
+
+def already_in_party():
+    return continue_screen("\nThat member is already in the party.", target="main")
+guild.add_screen("already_in_party", already_in_party())
+guild.add_screen("roster_full", roster_full())
+
+#
+
 
 guild.add_screen("remove_member", what_party())
 guild.add_screen("create_member", not_implemented())
@@ -82,7 +105,6 @@ guild.add_screen("save_party", what_party())
 #Error trying to read in 
 #What party!
 #Pick the party member to save to disk and remove from the party.
-#Sorry, the roster is full.
 #Select a race for your new character:
 #    (REROLL)
 #Enter the new member's name.
@@ -93,7 +115,6 @@ guild.add_screen("save_party", what_party())
 #error trying to save member in slot 
 #. name not found in name table!
 #Error on write.
-#That member is already in the party.
 #error on party write.
 #Error on creating party file.
 #Error on read.

@@ -65,8 +65,3 @@ def do_nothing():
         pass
     return execute
 
-def add_member(character):
-    def execute(state):
-        state.party.add(character)
-        state.ui.char_view.redraw(state)
-    return execute

@@ -99,8 +99,22 @@ class Character(object):
 class Party(object):
     def __init__(self):
         self.chars = []
+        self.max_chars = 6
+    def is_full(self):
+        return len(self.chars)==self.max_chars
+    def is_member(self, char):
+        for c in self.chars:
+            if c.name == char.name:
+                return True
+        return False
+        
     def add(self, char):
+        if self.is_member(char):
+            return (False, "already_in_party")
+        if self.is_full():
+            return (False, "roster_full")
         self.chars.append(char)
+        return (True,)
 
 
 
