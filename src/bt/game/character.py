@@ -100,8 +100,16 @@ class Party(object):
     def __init__(self):
         self.chars = []
         self.max_chars = 6
+        self.name = None
+        self.filename = None
+        self.special = None
+
     def is_full(self):
         return len(self.chars) == self.max_chars
+
+    def is_empty(self):
+        return not len(self.chars)
+
     def is_member(self, char):
         for c in self.chars:
             if c.name == char.name:
@@ -110,11 +118,18 @@ class Party(object):
 
     def add(self, char):
         if self.is_member(char):
-            return (False, "already_in_party")
+            return 1
         if self.is_full():
-            return (False, "roster_full")
+            return 2
         self.chars.append(char)
-        return (True,)
+        return 0
+
+    def remove(self, number):
+        if number >= len(self.chars):
+            return None
+        char = self.chars[number]
+        self.chars[number:number + 1] = []
+        return char
 
 
 

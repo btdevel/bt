@@ -32,13 +32,13 @@ screen.add_option('Yes', 'yY', action.leave_game())
 screen.add_option('No', 'nN', action.change_screen("main"))
 guild.add_screen("leave_game", screen)
 
-
+# The "Add member" screen (and helpers)
 def add_member(character):
     def execute(state):
         ret = state.party.add(character)
-        print ret, not ret[0]
-        if not ret[0]:
-            action.change_screen(ret[1])(state)
+        if ret:
+            screens = [None, "already_in_party", "no_room"]
+            action.change_screen(screens[ret])(state)
             return
         state.ui.char_view.redraw(state)
         action.change_screen("main")
@@ -68,46 +68,65 @@ class AddMemberScreen(Screen):
 guild.add_screen("add_member", AddMemberScreen())
 
 
+# Remove member screen
+def remove_member(number):
+    def execute(state):
+        char = state.party.remove(number)
+        # FIXME: char must be saved also
+        state.ui.char_view.redraw(state)
+        action.change_screen("main")
+    return execute
+
+class RemoveMemberScreen(Screen):
+    def enter(self, state):
+        self.clear()
+        if state.party.is_empty():
+            self.add_message("\nWhat party!")
+            self.add_option("\n(CONTINUE)", "cC", action.change_screen("main"), pos= -1, center=True)
+        else:
+            self.add_message("\nPick the party member to save to disk and remove from the party.")
+            for i in range(len(state.party.chars)):
+                self.add_key_event(chr(ord("1") + i), remove_member(i))
+            self.add_option("\n(CANCEL)", "cC", action.change_screen("main"), pos= -1, center=True)
+        self.set_cancel_screen("main")
+    pass
+guild.add_screen("remove_member", RemoveMemberScreen())
+
+# Some short message screens
+def message_screen(msg):
+    return continue_screen("\n\n%s" % msg, target="main")
 
 
+guild.add_screen("roster_full",
+                 message_screen("Sorry, the roster is full."))
 
+guild.add_screen("no_room",
+                 message_screen("No room to add new members."))
+
+guild.add_screen("already_in_party",
+                 message_screen("That member is already in the party."))
+
+guild.add_screen("what_party",
+                 message_screen("What party!"))
+
+guild.add_screen("must_have_party",
+                 message_screen("You must have a party to enter the city."))
+
+
+# Not yet implemented screens
 def not_implemented():
     return continue_screen("\nNot implemented yet.", target="main")
 
-def roster_full():
-    return continue_screen("\nSorry, the roster is full.", target="main")
-
-def what_party():
-    return continue_screen("\nWhat party!", target="main")
-
-def already_in_party():
-    return continue_screen("\nThat member is already in the party.", target="main")
-guild.add_screen("already_in_party", already_in_party())
-guild.add_screen("roster_full", roster_full())
-
-#
-
-
-guild.add_screen("remove_member", what_party())
 guild.add_screen("create_member", not_implemented())
 guild.add_screen("delete_member", not_implemented())
-guild.add_screen("save_party", what_party())
+guild.add_screen("save_party", not_implemented())
 
 
 
-#
-#
 #Name to save party under?
 #That name is already in use.
 #Do you still want to use it?
-#Leave the game?
-#You must have a party to enter the city.
-#The guild
-#The guild
-#No room to add new members.
 #Error trying to read in 
-#What party!
-#Pick the party member to save to disk and remove from the party.
 #Select a race for your new character:
 #    (REROLL)
 #Enter the new member's name.

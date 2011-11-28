@@ -30,6 +30,9 @@ def enter(handler):
 
 def enter_city(pos=None, newdir=None):
     def execute(state):
+        if state.party.is_empty():
+            state.curr_handler.set_screen(state, "must_have_party")
+            return
         if pos is not None:
             state.city_handler.set_position(pos)
         if newdir is not None:

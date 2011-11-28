@@ -115,7 +115,7 @@ class Screen(EventHandler):
             for text, pos, center in self.messages:
                 view.message(text, pos=pos, center=center)
 
-def continue_screen(msg, action=None, target=None):
+def message_screen(msg, action, target, option, keys):
     import bt.game.action as btaction
     if action is None:
         action = btaction.change_screen(target)
@@ -123,6 +123,15 @@ def continue_screen(msg, action=None, target=None):
     screen = Screen()
     screen.add_message(msg)
     screen.set_cancel_action(action)
-    screen.add_option('(CONTINUE)', 'cC', action, pos= -1, center=True)
+    screen.add_option(option, keys, action, pos= -1, center=True)
     return screen
+
+def continue_screen(msg, action=None, target=None):
+    return message_screen(msg, action, target, '(CONTINUE)', 'cC')
+
+def cancel_screen(msg, action=None, target=None):
+    return message_screen(msg, action, target, '(CANCEL)', 'cC')
+
+def exit_screen(msg, action=None, target=None):
+    return message_screen(msg, action, target, '(EXIT)', 'cC')
 
