@@ -101,13 +101,13 @@ class Party(object):
         self.chars = []
         self.max_chars = 6
     def is_full(self):
-        return len(self.chars)==self.max_chars
+        return len(self.chars) == self.max_chars
     def is_member(self, char):
         for c in self.chars:
             if c.name == char.name:
                 return True
         return False
-        
+
     def add(self, char):
         if self.is_member(char):
             return (False, "already_in_party")
@@ -128,6 +128,6 @@ Lk: %(char_lk)2d HP: %(char_hp)2d
 Lvl: %(char_level)2d HP: %(char_sppt)d
 Exper: %(char_exp)d
 Gold:  %(char_gold)d
-    (POOL GOLD)
-    (TRADE GOLD)
-    (CONTINUE)"""]
+(POOL GOLD)
+(TRADE GOLD)
+(CONTINUE)"""]

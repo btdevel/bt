@@ -15,6 +15,8 @@ class EventHandler(object):
                 self.keymap[c] = action
         else:
             self.keymap[key] = action
+    def set_cancel_action(self, action):
+        self.add_key_event((pygame.K_ESCAPE, 0), action)
     def key_event(self, state, key):
         if key in self.keymap:
             self.keymap[key](state)
@@ -36,7 +38,7 @@ class ImageDisplayHandler(EventHandler):
 class DefaultBuildingHandler(ImageDisplayHandler):
     def __init__(self, filename, message, exit_action=action.exit_building(), location=""):
         ImageDisplayHandler.__init__(self, filename, location=location)
-        self.add_key_event((pygame.K_ESCAPE, 0), exit_action)
+        self.set_cancel_action(exit_action)
         self.add_key_event("eE", exit_action)
         self.message = message
 
@@ -101,6 +103,9 @@ class Screen(EventHandler):
     def add_message(self, text, pos=None, center=False):
         self.messages.append((text, pos, center))
 
+    def set_cancel_screen(self, name):
+        self.set_cancel_action(action.change_screen(name))
+
     def add_option(self, text, keys, action, pos=None, center=False):
         self.add_message(text, pos=pos, center=center)
         self.add_key_event(keys, action)
@@ -117,6 +122,7 @@ def continue_screen(msg, action=None, target=None):
 
     screen = Screen()
     screen.add_message(msg)
-    screen.add_option('          (CONTINUE)', 'cC', action, pos= -1)
+    screen.set_cancel_action(action)
+    screen.add_option('(CONTINUE)', 'cC', action, pos= -1, center=True)
     return screen
 

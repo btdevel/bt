@@ -1,12 +1,15 @@
 import bt.game.action as action
-from bt.game.handler import MultiScreenHandler, Screen, continue_screen
+from bt.game.handler import (MultiScreenHandler, Screen, continue_screen)
 from bt.game.movement import Direction
+from bt.game.bt1.char import (get_char_list, load_msdos_char)
+
 
 class GuildHandler(MultiScreenHandler):
     pass
 
 guild = GuildHandler("inside/guild.png", location="The guild")
 
+# The main screen
 screen = Screen()
 screen.add_message("Thou art in the Guild of Adventurers.\n ")
 screen.add_option('Add member', 'aA', action.change_screen("add_member"))
@@ -19,15 +22,16 @@ screen.add_option('Enter the city', 'eE',
 #                  action.enter_city(pos=[2, 3], newdir=Direction.NORTH))
                   action.enter_city(pos=[25, 15], newdir=Direction.NORTH))
 guild.add_screen("main", screen)
+del screen
 
+# The leave Game screen
 screen = Screen()
+screen.set_cancel_screen("main")
 screen.add_message("Leave game?\n ")
 screen.add_option('Yes', 'yY', action.leave_game())
 screen.add_option('No', 'nN', action.change_screen("main"))
 guild.add_screen("leave_game", screen)
 
-
-from bt.game.bt1.char import (get_char_list, load_msdos_char)
 
 def add_member(character):
     def execute(state):
@@ -59,8 +63,7 @@ class AddMemberScreen(Screen):
             self.add_option(line, "%d" % i, add_member(rchar))
             if i == 9:
                 break
-        import pygame
-        self.add_key_event((pygame.K_ESCAPE, 0), action.change_screen("main"))
+        self.set_cancel_screen("main")
 
 guild.add_screen("add_member", AddMemberScreen())
 

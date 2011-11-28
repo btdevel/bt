@@ -1,11 +1,10 @@
-import pygame
 import bt.game.action as action
 from bt.game.handler import ImageDisplayHandler
 
 class CreditsHandler(ImageDisplayHandler):
     def __init__(self, filename, message, exit_action=action.exit_building(), location=""):
         ImageDisplayHandler.__init__(self, filename, location=location)
-        self.add_key_event((pygame.K_ESCAPE, 0), exit_action)
+        self.set_cancel_action(exit_action)
         self.add_key_event("cC", exit_action)
         self.message = message
 
