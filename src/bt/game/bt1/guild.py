@@ -1,3 +1,5 @@
+import pygame
+
 import bt.game.action as action
 from bt.game.handler import (MultiScreenHandler, Screen, continue_screen)
 from bt.game.movement import Direction
@@ -37,6 +39,7 @@ def add_member(char):
     def execute(state):
         if char.is_party:
             char_loader = app.get_char_loader()
+            # FIXME: check if char exists, do with loop, return when full
             ret = state.party.add(char_loader.load_char_by_name(char.name1))
             ret = state.party.add(char_loader.load_char_by_name(char.name2))
             ret = state.party.add(char_loader.load_char_by_name(char.name3))
@@ -55,25 +58,67 @@ def add_member(char):
 
 
 class AddMemberScreen(Screen):
-    def enter(self, state):
-        if state.party.is_full():
-            action.change_screen("roster_full")(state)
-            return
+    def make_char_list(self):
         char_loader = app.get_char_loader()
-
-        self.clear()
-        for i, char in enumerate(char_loader.char_list()):
-            if char.is_party:
+        list = []
+        for i, charinfo in enumerate(char_loader.char_list()):
+            if charinfo.is_party:
                 line = "*"
             else:
                 line = "  "
-            line += char.name
-            line = str(i) + " " + line
-            rchar = char_loader.load_char(char.filename)
-            self.add_option(line, "%d" % i, add_member(rchar))
-            if i == 9:
-                break
+            line += charinfo.name
+            char = char_loader.load_char(charinfo.filename)
+            list.append((i, line, char))
+        return list
+
+    def newenter(self, state):
+        if state.party.is_full():
+            action.change_screen("roster_full")(state)
+            return
+
+        self.clear()
+        self.list = self.make_char_list()
+        self.start_disp=0
+        self.num_disp=10
+        self.num_sel=0
         self.set_cancel_screen("main")
+        self.add_key_event( (pygame.K_DOWN, 0), self.down )
+        self.add_key_event( (pygame.K_UP, 0), self.up )
+        self.add_key_event( (pygame.K_RETURN, 0), self.select )
+
+    def enter(self, state):
+        return self.newenter(state)
+
+    def redraw(self, state):
+        with state.ui.message_view.noupdate() as view:
+            view.clear()
+            if self.list:
+                for i in xrange(self.start_disp,self.start_disp+self.num_disp):
+                    if i>=len(self.list):
+                        break
+                    line = self.list[i][1]
+                    view.print_list_entry(line+"  ", i==self.num_sel)
+            else:
+                for text, pos, center in self.messages:
+                    view.message(text, pos=pos, center=center)
+
+    def up(self, state):
+        if self.num_sel>0:
+            self.num_sel-=1
+        if self.num_sel<self.start_disp:
+            self.start_disp-=1
+        self.redraw(state)
+
+    def down(self, state):
+        if self.num_sel<len(self.list)-1:
+            self.num_sel+=1
+        if self.num_sel>=self.start_disp+self.num_disp:
+            self.start_disp+=1
+        self.redraw(state)
+
+    def select(self, state):
+        print self.list[self.num_sel]
+        add_member(self.list[self.num_sel][2])(state)
 
 guild.add_screen("add_member", AddMemberScreen())
 
@@ -128,21 +173,31 @@ def not_implemented():
     return continue_screen("\nNot implemented yet.", target="main")
 
 guild.add_screen("create_member", not_implemented())
-guild.add_screen("delete_member", not_implemented())
-guild.add_screen("save_party", not_implemented())
-
-
-
-#Name to save party under?
-#That name is already in use.
-#Do you still want to use it?
-#Error trying to read in 
 #Select a race for your new character:
 #    (REROLL)
 #Enter the new member's name.
+#That name is already in use.
+#Do you still want to use it?
+
+
+guild.add_screen("delete_member", not_implemented())
 #You can't delete a member in your party from the disk.
 #This will permanently remove 
 # from the disk! Do you wish to do this?
+
+
+guild.add_screen("save_party", not_implemented())
+#Name to save party under?
+#That name is already in use.
+#Do you still want to use it?
+
+
+
+
+
+# Error messages (unused currently)
+#====================================
+#Error trying to read in 
 #File not found.
 #error trying to save member in slot 
 #. name not found in name table!

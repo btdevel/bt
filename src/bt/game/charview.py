@@ -1,7 +1,8 @@
-import bt.game.view as view
+from bt.game.handler import EventHandler
+from bt.game.view import View
 import bt.game.character
 
-class CharacterView(view.View):
+class CharacterView(View):
     def redraw(self, state):
         party = state.party
 
@@ -23,6 +24,11 @@ class CharacterView(view.View):
                 attribs = "%s\t%s\t%s\t%s\t%s\t%s" % (char.name, char.ac, char.max_hp, char.curr_hp, char.curr_sp, char.char_class)
                 view.print_tabbed(attribs, tabs)
 
+
+class CharDisplayHandler(EventHandler):
+    def __init__(self):
+        EventHandler.__init__(self)
+        #self.add_key_event
 
 chardisp = ["inside/empty.png",
                              """N %(char_name)s

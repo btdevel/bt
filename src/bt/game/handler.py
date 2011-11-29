@@ -127,11 +127,11 @@ def message_screen(msg, action, target, option, keys):
     return screen
 
 def continue_screen(msg, action=None, target=None):
-    return message_screen(msg, action, target, '(CONTINUE)', 'cC')
+    return message_screen(msg, action, target, '(CONTINUE)', 'cC \n')
 
 def cancel_screen(msg, action=None, target=None):
-    return message_screen(msg, action, target, '(CANCEL)', 'cC')
+    return message_screen(msg, action, target, '(CANCEL)', 'cC \n')
 
 def exit_screen(msg, action=None, target=None):
-    return message_screen(msg, action, target, '(EXIT)', 'cC')
+    return message_screen(msg, action, target, '(EXIT)', 'cC \n')
 

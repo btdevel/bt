@@ -115,6 +115,22 @@ class View():
         surf.blit(im, (x, y))
         self.update()
 
+    def print_list_entry(self, text, reversed=False):
+        surf = self.get_surf()
+        font = self.get_font()
+        text = self._interpolate_string(text)
+        if not reversed:
+            im = font.render(text, 1, self.fgcolor)
+        else:
+            im = font.render(text, 1, 
+                             pygame.Color("#000033"), 
+                             pygame.Color("#FFFF77"))
+        x, y = self.pos
+        surf.blit(im, (x, y))
+        y += font.size(text)[1] + self.linesep
+        self.pos = (x,y)
+        self.update()
+
     def print_tabbed(self, texts, tabs):
         surf = self.get_surf()
         font = self.get_font()

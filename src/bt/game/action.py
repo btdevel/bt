@@ -1,3 +1,5 @@
+from bt.game.app import app
+
 def one_time_only(action):
     first = [True]
     def new_action(state):
@@ -30,7 +32,8 @@ def enter(handler):
 
 def enter_city(pos=None, newdir=None):
     def execute(state):
-        if state.party.is_empty():
+        need_party = app.config.debug.need_party(default=True, type=bool)
+        if need_party and state.party.is_empty():
             state.curr_handler.set_screen(state, "must_have_party")
             return
         if pos is not None:
