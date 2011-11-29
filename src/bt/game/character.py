@@ -1,5 +1,3 @@
-# this module contains just some ideas, nothing of which is finished yet
-
 class CharacterClass(object):
     def __init__(self, id, name):
         self.id = id
@@ -20,12 +18,19 @@ class CharacterRace(object):
 
 #elf = CharRace( "Elf", modifiers )
 
-
-class Character(object):
+class CharPartyBase(object):
+    def __init__(self, is_party):
+        self.is_party = is_party
+        self.name = ""
+        self.filename = ""
+        # fullload?
+    
+class Character(CharPartyBase):
     classes = {}
     races = {}
 
     def __init__(self, id=None):
+        CharPartyBase.__init__(self, False)
         self.id = id
         self.name = ""
         self.status = 0
@@ -96,8 +101,9 @@ class Character(object):
 # Alive=00h
 
 
-class Party(object):
+class Party(CharPartyBase):
     def __init__(self):
+        CharPartyBase.__init__(self, True)
         self.chars = []
         self.max_chars = 6
         self.name = None
@@ -130,19 +136,3 @@ class Party(object):
         char = self.chars[number]
         self.chars[number:number + 1] = []
         return char
-
-
-
-chardisp = ["inside/empty.png",
-                             """N %(char_name)s
-Race: %(char_race)s
-Class: %(char_class)s
-St: %(char_st)2d IQ: %(char_iq)2d  
-Dx: %(char_dx)2d Cn: %(char_cn)2d
-Lk: %(char_lk)2d HP: %(char_hp)2d
-Lvl: %(char_level)2d HP: %(char_sppt)d
-Exper: %(char_exp)d
-Gold:  %(char_gold)d
-(POOL GOLD)
-(TRADE GOLD)
-(CONTINUE)"""]

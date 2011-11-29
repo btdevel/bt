@@ -17,9 +17,23 @@ class CharacterView(view.View):
                 tabs = ((0, "L"), (286, "R"), (366, "R"), (446, "R"), 
                         (526, "R"), (544, "L"))
 
-            print party.chars
             for char in party.chars:
                 char.ac = "10"
+                #FIXME: need to compute AC
                 attribs = "%s\t%s\t%s\t%s\t%s\t%s" % (char.name, char.ac, char.max_hp, char.curr_hp, char.curr_sp, char.char_class)
                 view.print_tabbed(attribs, tabs)
 
+
+chardisp = ["inside/empty.png",
+                             """N %(char_name)s
+Race: %(char_race)s
+Class: %(char_class)s
+St: %(char_st)2d IQ: %(char_iq)2d  
+Dx: %(char_dx)2d Cn: %(char_cn)2d
+Lk: %(char_lk)2d HP: %(char_hp)2d
+Lvl: %(char_level)2d HP: %(char_sppt)d
+Exper: %(char_exp)d
+Gold:  %(char_gold)d
+(POOL GOLD)
+(TRADE GOLD)
+(CONTINUE)"""]

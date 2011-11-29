@@ -56,4 +56,19 @@ class App(object):
             conf = conferr.config
         return Config(conf)
 
+    def _make_loader(self, classname, *args):
+        parts=classname.split(".")
+        loader_module=".".join(parts[:-1])
+        loader_class=parts[-1]
+        #print loader, loader_module, loader_class
+        module = __import__(loader_module, fromlist=[loader_class])
+        Loader = module.__getattribute__(loader_class)
+        return Loader(*args)
+    
+    def get_char_loader(self):
+        char_loader=app.config.main.char_loader()
+        char_path=app.config.main.char_path()
+        return self._make_loader(char_loader, char_path)
+        
+
 app = App()

@@ -1,9 +1,13 @@
+import glob
 import struct
 
 import bt.extract.btfile as btfile
 import bt.char as btchar
 
-fields_msdos = [("name", ">14s  2x"),
+base_fields  = [("name", ">14s  2x"),
+                ("char_party", "B")]
+
+char_fields  = [("name", ">14s  2x"),
                 ("char_party", "B"),
                 ("status", "B"),
                 ("race", "xB"),
@@ -33,6 +37,13 @@ fields_msdos = [("name", ">14s  2x"),
                 ("num_songs", "B15x")
                 ]
 
+party_fields = [("name", ">14s  2x"),
+                ("char_party", "B"),
+                ("name1", ">14s  2x"),
+                ("name2", ">14s  2x"),
+                ("name3", ">14s  2x"),
+                ("name4", ">14s  2x")]
+
 
 def fill_fields_from_buffer(char, fields, buffer):
     offset = 0
@@ -43,31 +54,44 @@ def fill_fields_from_buffer(char, fields, buffer):
         char.__setattr__(attr_name, value[0])
         offset += struct.calcsize(fmt)
 
-def load_msdos_character2(filename):
-    char = btchar.Character()
+def load_character(filename):
     ba = btfile.load_file(filename)
-    fill_fields_from_buffer(char, fields_msdos, ba)
-    return char
-
-def load_msdos_character(id, path):
-    if isinstance(id, str):
-        raise Exception("Not yet implemented")
-
-    char = btchar.Character(id)
-    ba = btfile.load_file(str(id) + ".TPW", path)
-
-    fill_fields_from_buffer(char, fields_msdos, ba)
+    char = btchar.Character()
+    fill_fields_from_buffer(char, char_fields, ba)
     return char
 
 def load_base_info(filename):
     ba = btfile.load_file(filename)
-    fields = fields_msdos[:2]
     char = btchar.Character(id)
-    fill_fields_from_buffer(char, fields, ba)
-    class BaseChar():
-        pass
-    char_info = BaseChar()
+    fill_fields_from_buffer(char, base_fields, ba)
+    char_info = btchar.CharPartyBase(char.char_party == 2)
     char_info.name = char.name
-    char_info.is_party = char.char_party == 2
     char_info.filename = filename
     return char_info
+
+def get_char_list(btpath):
+    files = glob.glob(btpath + "/*.TPW")
+    filelist = []
+    for filename in files:
+        char = load_base_info(filename)
+        filelist.append(char)
+
+    return filelist
+
+#In config: char_loader = bt.extract.bt1.char_msdos.Loader
+class Loader(object):
+    def __init__(self, char_path):
+        self.char_path = char_path
+        
+    def char_list(self):
+        return get_char_list(self.char_path)
+
+    def load_char(self, filename):
+        return load_character(filename)
+
+    def save_char(self):
+        raise NotImplemented
+
+    def __str__(self):
+        return "MSDOS loader for BT1 (path='%s')" % self.char_path
+

@@ -1,7 +1,7 @@
 import bt.game.action as action
 from bt.game.handler import (MultiScreenHandler, Screen, continue_screen)
 from bt.game.movement import Direction
-from bt.game.bt1.char import (get_char_list, load_msdos_char)
+from bt.game.app import app
 
 
 class GuildHandler(MultiScreenHandler):
@@ -33,9 +33,11 @@ screen.add_option('No', 'nN', action.change_screen("main"))
 guild.add_screen("leave_game", screen)
 
 # The "Add member" screen (and helpers)
-def add_member(character):
+def add_member(char):
     def execute(state):
-        ret = state.party.add(character)
+        if char.is_party:
+            print "Is party!!!"
+        ret = state.party.add(char)
         if ret:
             screens = [None, "already_in_party", "no_room"]
             action.change_screen(screens[ret])(state)
@@ -50,16 +52,17 @@ class AddMemberScreen(Screen):
         if state.party.is_full():
             action.change_screen("roster_full")(state)
             return
+        char_loader = app.get_char_loader()
 
         self.clear()
-        for i, char in enumerate(get_char_list()):
+        for i, char in enumerate(char_loader.char_list()):
             if char.is_party:
                 line = "*"
             else:
                 line = "  "
             line += char.name
             line = str(i) + " " + line
-            rchar = load_msdos_char(char.filename)
+            rchar = char_loader.load_char(char.filename)
             self.add_option(line, "%d" % i, add_member(rchar))
             if i == 9:
                 break
