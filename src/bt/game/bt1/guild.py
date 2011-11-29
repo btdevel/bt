@@ -36,12 +36,19 @@ guild.add_screen("leave_game", screen)
 def add_member(char):
     def execute(state):
         if char.is_party:
-            print "Is party!!!"
-        ret = state.party.add(char)
-        if ret:
-            screens = [None, "already_in_party", "no_room"]
-            action.change_screen(screens[ret])(state)
-            return
+            char_loader = app.get_char_loader()
+            ret = state.party.add(char_loader.load_char_by_name(char.name1))
+            ret = state.party.add(char_loader.load_char_by_name(char.name2))
+            ret = state.party.add(char_loader.load_char_by_name(char.name3))
+            ret = state.party.add(char_loader.load_char_by_name(char.name4))
+            ret = state.party.add(char_loader.load_char_by_name(char.name5))
+            ret = state.party.add(char_loader.load_char_by_name(char.name6))
+        else:
+            ret = state.party.add(char)
+            if ret:
+                screens = [None, "already_in_party", "no_room"]
+                action.change_screen(screens[ret])(state)
+                return
         state.ui.char_view.redraw(state)
         action.change_screen("main")
     return execute

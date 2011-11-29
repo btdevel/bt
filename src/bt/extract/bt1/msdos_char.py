@@ -42,7 +42,9 @@ party_fields = [("name", ">14s  2x"),
                 ("name1", ">14s  2x"),
                 ("name2", ">14s  2x"),
                 ("name3", ">14s  2x"),
-                ("name4", ">14s  2x")]
+                ("name4", ">14s  2x"),
+                ("name5", ">14s  2x"),
+                ("name6", ">14s  2x")]
 
 
 def fill_fields_from_buffer(char, fields, buffer):
@@ -50,15 +52,34 @@ def fill_fields_from_buffer(char, fields, buffer):
     buffer = bytes(buffer)
     for field in fields:
         attr_name, fmt = field
-        value = struct.unpack_from(fmt, buffer, offset)
-        char.__setattr__(attr_name, value[0])
+        value = struct.unpack_from(fmt, buffer, offset)[0]
+        if isinstance(value, str):
+            value=value.split("\0")[0]
+        char.__setattr__(attr_name, value)
         offset += struct.calcsize(fmt)
 
 def load_character(filename):
+    info = load_base_info(filename)
+    if info.is_party:
+        return load_party(filename)
+
     ba = btfile.load_file(filename)
     char = btchar.Character()
     fill_fields_from_buffer(char, char_fields, ba)
     return char
+
+def load_character_by_name(btpath, name):
+    char_list = get_char_list(btpath)
+    for char in char_list:
+        if char.name==name:
+            return load_character(char.filename)
+    return None
+
+def load_party(filename):
+    ba = btfile.load_file(filename)
+    party = btchar.Party()
+    fill_fields_from_buffer(party, party_fields, ba)
+    return party
 
 def load_base_info(filename):
     ba = btfile.load_file(filename)
@@ -88,6 +109,9 @@ class Loader(object):
 
     def load_char(self, filename):
         return load_character(filename)
+
+    def load_char_by_name(self, name):
+        return load_character_by_name(self.char_path, name)
 
     def save_char(self):
         raise NotImplemented

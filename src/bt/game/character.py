@@ -117,6 +117,8 @@ class Party(CharPartyBase):
         return not len(self.chars)
 
     def is_member(self, char):
+        if char is None: 
+            return False
         for c in self.chars:
             if c.name == char.name:
                 return True
