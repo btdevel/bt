@@ -7,19 +7,12 @@ res_path = os.path.join("..", "res")
 msdos_bt1_path = os.path.join(res_path, "msdos", "bt1")
 
 
-# levels
-if False:
-    btfile.show_indexed_file_info("levs", msdos_bt1_path)
-    data = btfile.load_indexed_file("levs", msdos_bt1_path)
-
 # images
 pal16 = btimage.palette_cga16()
 pal16g = btimage.palette_grey16()
 pal64 = btimage.palette_ega64()
 pal256 = btimage.palette_grey256()
 vsize = btimage.view_size()
-
-
 
 
 if True:

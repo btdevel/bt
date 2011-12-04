@@ -89,37 +89,36 @@ class CityHandler(EventHandler):
         state.ui.blit_image(filename)
 
     def redraw(self, state):
-        surf = state.ui.world_view.get_surf()
-        if self.isbuildingat(1):
-            pygame.draw.rect(surf, pygame.Color(0, 0, 119),
-                              pygame.Rect(0, 0, 224, 92 + 84))
-        else:
-            pygame.draw.rect(surf, pygame.Color(0, 0, 119),
-                              pygame.Rect(0, 0, 224, 92))
-            pygame.draw.rect(surf, pygame.Color(204, 119, 85),
-                              pygame.Rect(0, 0 + 92, 224, 84))
-
-        # naming for building images with location relative to xx  
-        #    F2
-        # L2 F1 R2
-        # L1 F0 R1
-        # L0 xx R0
-        if self.isbuildingat(1):
-            self.blit_building_at(state, 1)
-        else:
-            if self.isbuildingat(2):
-                self.blit_building_at(state, 2)
+        with state.ui.world_view.noupdate():
+            surf = state.ui.world_view.get_surf()
+            if self.isbuildingat(1):
+                pygame.draw.rect(surf, pygame.Color(0, 0, 119),
+                                 pygame.Rect(0, 0, 224, 92 + 84))
             else:
-                self.blit_building_at(state, 3)
-                self.blit_building_at(state, 2, 1)
-                self.blit_building_at(state, 2, -1)
+                pygame.draw.rect(surf, pygame.Color(0, 0, 119),
+                                 pygame.Rect(0, 0, 224, 92))
+                pygame.draw.rect(surf, pygame.Color(204, 119, 85),
+                                 pygame.Rect(0, 0 + 92, 224, 84))
 
-            self.blit_building_at(state, 1, 1)
-            self.blit_building_at(state, 1, -1)
-            self.blit_building_at(state, 0, 1)
-            self.blit_building_at(state, 0, -1)
+            # naming for building images with location relative to xx  
+            #    F2
+            # L2 F1 R2
+            # L1 F0 R1
+            # L0 xx R0
+            if self.isbuildingat(1):
+                self.blit_building_at(state, 1)
+            else:
+                if self.isbuildingat(2):
+                    self.blit_building_at(state, 2)
+                else:
+                    self.blit_building_at(state, 3)
+                    self.blit_building_at(state, 2, 1)
+                    self.blit_building_at(state, 2, -1)
 
-        state.ui.update_display()
+                self.blit_building_at(state, 1, 1)
+                self.blit_building_at(state, 1, -1)
+                self.blit_building_at(state, 0, 1)
+                self.blit_building_at(state, 0, -1)
 
 
     def set_position(self, pos):
