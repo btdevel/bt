@@ -18,13 +18,25 @@ def generate_htree(bit_seq):
     t1 = generate_htree(bit_seq)
     return [t0, t1]
 
-def print_htree(t, prefix=""):
+
+def iterate_htree(htree):
+    def htreeiter(t, prefix):
+        if isinstance(t, int):
+            yield t, prefix
+        else:
+            for x in htreeiter(t[0], prefix + "0"):
+                yield x
+            for x in htreeiter(t[1], prefix + "1"):
+                yield x
+    return htreeiter(htree, "")
+
+def print_htree(htree, count=None):
     "Print Huffman tree."
-    if isinstance(t, int):
-        print prefix + ": ", hex(t)
-    else:
-        print_htree(t[0], prefix + "0")
-        print_htree(t[1], prefix + "1")
+    for (val, bits) in iterate_htree(htree):
+        if count:
+            print  "%02d %s: %02x (%d)" %  (len(bits), bits, val, count[val])
+        else:
+            print  "%s: %02x" %  (bits, val)
 
 def decode(bit_seq, htree, num_decoded):
     "Decode bit sequence using a Huffman tree."
