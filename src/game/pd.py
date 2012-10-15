@@ -6,7 +6,7 @@ from direct.gui.DirectGui import *
 from direct.interval.IntervalGlobal import *
 from panda3d.core import lookAt
 from panda3d.core import GeomVertexFormat, GeomVertexData
-from panda3d.core import Geom, GeomTriangles, GeomVertexWriter
+from panda3d.core import Geom, GeomTriangles, GeomVertexWriter, GeomTristrips
 from panda3d.core import Texture, GeomNode
 from panda3d.core import PerspectiveLens
 from panda3d.core import CardMaker
@@ -20,17 +20,17 @@ from direct.interval.IntervalGlobal import Sequence
 
 def makeSquare(face, rhs=True):
     format=GeomVertexFormat.getV3n3cpt2()
-    vdata=GeomVertexData('square', format, Geom.UHDynamic)
+    format=GeomVertexFormat.getV3n3t2()
+    vdata=GeomVertexData('square', format, Geom.UHStatic)
 
     vertex=GeomVertexWriter(vdata, 'vertex')
     normal=GeomVertexWriter(vdata, 'normal')
-    color=GeomVertexWriter(vdata, 'color')
+    #color=GeomVertexWriter(vdata, 'color')
     texcoord=GeomVertexWriter(vdata, 'texcoord')
 
     if not rhs:
         face = list(reversed(face))
 
-	
     normalvec = (face[1]-face[0]).cross(face[2]-face[0])
     normalvec.normalize()
 
@@ -38,27 +38,24 @@ def makeSquare(face, rhs=True):
     f = 1.0
     for ver in face:
         vertex.addData3f(ver*f)
-	normal.addData3f(normalvec)
-	color.addData3f(ver*0.0+1.0)
-	color.addData3f((ver+1.0+2.0)*0.25)
+        normal.addData3f(normalvec)
+        #color.addData3f((ver+1.0+2.0)*0.25)
+        #color.addData3f(ver*0.0+1.0)
 
     if not normalvec.z:
         texcoord.addData2f(0.0, 0.0)
-	texcoord.addData2f(1.0, 0.0)
-	texcoord.addData2f(1.0, 1.0)
-	texcoord.addData2f(0.0, 1.0)
+        texcoord.addData2f(1.0, 0.0)
+        texcoord.addData2f(1.0, 1.0)
+        texcoord.addData2f(0.0, 1.0)
 
-    tri1=GeomTriangles(Geom.UHDynamic)
-    tri2=GeomTriangles(Geom.UHDynamic)
-    tri1.addVertices(0, 1, 2)
-    tri2.addVertices(2, 3, 0)
-    tri1.closePrimitive()
-    tri2.closePrimitive()
+    
+    tri=GeomTriangles(Geom.UHStatic)
+    tri.addVertices(0, 1, 2)
+    tri.addVertices(2, 3, 0)
+    tri.closePrimitive()
 
     square=Geom(vdata)
-    square.addPrimitive(tri1)
-    square.addPrimitive(tri2)
-	
+    square.addPrimitive(tri)
     return square
 
 def makeCube(inverse=False, hide={}):
@@ -80,7 +77,7 @@ def makeCube(inverse=False, hide={}):
         ]
     squares = [makeSquare(face, rhs=not inverse) 
                for i, face in enumerate(faces) 
-	       if i not in hide]
+               if i not in hide]
     cube=GeomNode('cube')
     for square in squares:
         cube.addGeom(square)

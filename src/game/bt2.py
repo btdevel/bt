@@ -125,9 +125,9 @@ class App(ShowBase):
         self.camera.setPos(10, -80, 70)
         self.camera.lookAt(10, 20, 0)
         self.camLens.setFov(90.0)
-	self.win.setClearColor(Vec4(0,0,0,0))
+        self.win.setClearColor(Vec4(0,0,0,0))
 
-	make_level(self.render)
+        make_level(self.render)
 
         self.accept("escape", exit)
         self.accept("arrow_up", self.forward)
@@ -139,17 +139,17 @@ class App(ShowBase):
         self.accept("2", self.set_camera_out)
         self.accept("3", self.spin_camera_left)
         self.accept("4", self.spin_camera_right)
-		
+    
         slight = PointLight('slight')
         slight.setColor(Vec4(1, 1, 1, 1))
         slnp = render.attachNewNode(slight)
-	render.setLight(slnp)
-	slnp.setPos(self.camera, 0, 0, 20)
+        render.setLight(slnp)
+        slnp.setPos(self.camera, 0, 0, 20)
 
-	alight = AmbientLight('alight')
-	alight.setColor((0.2, 0.2, 0.2, 1))
-	alnp = render.attachNewNode(alight)
-	render.setLight(alnp)
+        alight = AmbientLight('alight')
+        alight.setColor((0.2, 0.2, 0.2, 1))
+        alnp = render.attachNewNode(alight)
+        render.setLight(alnp)
 
         title = OnscreenText(text="Bard's Tale I",
                              style=1, fg=(1,1,1,1),
@@ -201,15 +201,6 @@ class App(ShowBase):
     def turn_right(self):
         self.dir.right()
         self.set_camera()
-
-
-
-
-        
-        
-        
-
-
 
 
 app=App()
