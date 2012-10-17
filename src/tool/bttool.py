@@ -4,6 +4,8 @@ import sys
 
 import btfile
 
+btpath = os.environ.get("BTPATH",".")
+
 opt_args = [ "expand", "compress", "identity", "hex"]
 val_args = [ "fileid"]
 
@@ -89,7 +91,7 @@ else:
 if expand:
     if compress or identity:
         help_args(1)
-    infilename = basename
+    infilename = os.path.join(btpath, basename)
     if indexed:
         outfilepat = "%s-%%02d.%s" % (basename, extension)
         btfile.expand_indexed(infilename, outfilepat, hex=hex)
@@ -99,7 +101,7 @@ if expand:
 elif compress:
     if identity:
         help_args(1)
-    outfilename = basename
+    outfilename = os.path.join(btpath, basename)
     if indexed:
         infileglob = "%s-*.%s" % (basename, extension)
         btfile.compress_indexed(infileglob, outfilename, hex=hex)
@@ -109,10 +111,11 @@ elif compress:
 elif identity:
     if hex:
         help_args(2)
+    inoutfilename = os.path.join(btpath, basename)
     if indexed:
-        btfile.identity_recompress_indexed(basename)
+        btfile.identity_recompress_indexed(inoutfilename)
     else:
-        btfile.identity_recompress(basename)
+        btfile.identity_recompress(inoutfilename)
 else:
     help_args(1)
 
