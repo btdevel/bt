@@ -10,7 +10,7 @@ from panda3d.core import Geom, GeomTriangles, GeomVertexWriter
 from panda3d.core import Texture, TextureStage, GeomNode, NodePath
 from panda3d.core import PerspectiveLens
 from panda3d.core import CardMaker
-from panda3d.core import Light, Spotlight, PointLight, AmbientLight
+from panda3d.core import Light, Spotlight, PointLight, AmbientLight, LightRampAttrib
 from panda3d.core import TextNode
 from panda3d.core import Vec3, Vec4, Point3, Material
 import sys, os
@@ -26,14 +26,15 @@ def white(s):
 
 
 class config(object):
-    start_level = "level00"
+    start_level = "level07"
 
     camera_angle = 110
     camera_angle = 90
-    camera_angle = 170
+    camera_angle = 110
     camera_angle_out = 60
 
-    flash_time = 0.3
+    flash_white = True
+    flash_time = 0.2
     move_time = 0.2
 
     smoke_color = white(0.1)
@@ -91,6 +92,7 @@ class App(ShowBase):
         self.camLens.setFar(100)
         self.camLens.setFov(config.camera_angle)
         self.setBackgroundColor(Vec4(0, 0, 0, 0))
+        self.setFrameRateMeter(True)
         
 
         self.level = load_level(config.start_level)
@@ -122,7 +124,7 @@ class App(ShowBase):
         slight = PointLight('slight')
         slight.setColor(Vec4(1, 1, 1, 1))
         slnp = render.attachNewNode(slight)
-        slight.setAttenuation((1, 0, 0.02))
+        #slight.setAttenuation((1, 0, 0.02))
         render.setLight(slnp)
         self.slight = slight
         self.light = slnp
@@ -146,13 +148,15 @@ class App(ShowBase):
 
         print self.eventMgr
 
-        #render.setShaderAuto()
-
         from panda3d.core import AntialiasAttrib
         self.render.setAntialias(AntialiasAttrib.MMultisample)
 
         self.follow = True
         self.set_camera()
+
+
+        render.setAttrib(LightRampAttrib.makeIdentity())
+        render.setShaderAuto()
 
 
     def spin_camera_right(self, degrees=360, time=1.0):
@@ -261,15 +265,22 @@ class App(ShowBase):
     def teleport(self, newpos):
         self.newpos = newpos
 
-        amb1 = white(1.0)
-        amb2 = white(0.0)
+        if config.flash_white:
+            light = self.alight
+            color1 = Vec4(light.getColor())
+            color2 = white(20.0)
+        else:
+            light = self.slight
+            color1 = Vec4(light.getColor())
+            color2 = white(0.0)
+
         dt = config.flash_time / 2.0
         from direct.interval.LerpInterval import LerpFunctionInterval
         from direct.interval.FunctionInterval import Func
         Sequence(
-            LerpFunctionInterval(self.slight.setColor, dt, amb1, amb2),
+            LerpFunctionInterval(light.setColor, dt, color1, color2),
             Func(self.set_newpos, newpos),
-            LerpFunctionInterval(self.slight.setColor, dt, amb2, amb1)
+            LerpFunctionInterval(light.setColor, dt, color2, color1),
             ).start()
 
     def set_newpos(self, newpos):

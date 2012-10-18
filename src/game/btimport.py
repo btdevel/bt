@@ -41,7 +41,7 @@ def load_level(filename):
     for (y, x), (yt, xt) in level.teleports:
         cells[x][y].teleport = (xt, yt)
         print (x, y), (xt, yt)
-    cells[0][1].teleport = (1, 10)
+    cells[0][1].teleport = (1, 5)
         
 
     if level.dungeon_name == "Cellars":
